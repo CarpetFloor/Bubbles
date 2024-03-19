@@ -16,7 +16,7 @@ window.onload = () => {
     c.height = h;
 
     // circleSize = (CIRCLES_MAX_COUNT_HORIZONTAL + CIRCLES_SPACING);
-    circleSize = w / ((CIRCLES_MAX_COUNT_HORIZONTAL * 2) + CIRCLES_SPACING);
+    circleSize = w / (((CIRCLES_MAX_COUNT_HORIZONTAL + 1) * 2) + CIRCLES_SPACING);
     aimer.smallerSize = circleSize / 3;
     
     c.addEventListener("mousemove", setMouseAngle);
@@ -141,6 +141,10 @@ function drawCircles() {
 
     for(let row = 0; row < circles.length; row++) {
         x = circleSize + CIRCLES_SPACING;
+
+        if(row % 2 == 1) {
+            x += circleSize + CIRCLES_SPACING;
+        }
 
         for(let col = 0; col < circles[0].length; col++) {
             drawCircle(
