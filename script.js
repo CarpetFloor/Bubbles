@@ -18,6 +18,7 @@ window.onload = () => {
     // circleSize = (CIRCLES_MAX_COUNT_HORIZONTAL + CIRCLES_SPACING);
     circleSize = w / (((CIRCLES_MAX_COUNT_HORIZONTAL + 1) * 2) + CIRCLES_SPACING);
     aimer.smallerSize = circleSize / 3;
+    initCircles();
     
     c.addEventListener("mousemove", setMouseAngle);
     c.addEventListener("click", launch);
@@ -118,47 +119,75 @@ function randomColor() {
     return colors.current[Math.floor((Math.random() * (max - min)) + min)];
 }
 
+function Circle(x, y, color) {
+    this.x = x;
+    this.y = y;
+    this.color = color;
+}
 let circles = [];
 
 function initCircles() {
+    let x = -1;
+    let y = circleSize + CIRCLES_SPACING;
     circles = [];
 
     for(let row = 0; row < CIRCLES_STARTING_ROWS_COUNT; row++) {
         let currentRow = [];
-    
-        for(let col = 0; col < CIRCLES_MAX_COUNT_HORIZONTAL; col++) {
-            currentRow.push(randomColor());
-        }
-    
-        circles.push(currentRow);
-    }
-}
-initCircles();
 
-function drawCircles() {
-    let x = -1;
-    let y = circleSize + CIRCLES_SPACING;
-
-    for(let row = 0; row < circles.length; row++) {
         x = circleSize + CIRCLES_SPACING;
 
         if(row % 2 == 1) {
             x += circleSize + CIRCLES_SPACING;
         }
-
-        for(let col = 0; col < circles[0].length; col++) {
-            drawCircle(
-                x, 
-                y, 
-                circles[row][col], 
-                circleSize
-            );
+    
+        for(let col = 0; col < CIRCLES_MAX_COUNT_HORIZONTAL; col++) {
+            currentRow.push(new Circle(x, y, randomColor()));
 
             x += (circleSize * 2) + CIRCLES_SPACING;
         }
-        
+
+        circles.push(currentRow);
+
         y += (circleSize * 2) + CIRCLES_SPACING;
     }
+}
+
+function drawCircles() {
+    for(let row = 0; row < circles.length; row++) {
+        for(let col = 0; col < circles[row].length; col++) {
+            drawCircle(
+                circles[row][col].x, 
+                circles[row][col].y, 
+                circles[row][col].color, 
+                circleSize
+            );
+        }
+    }
+}
+
+/**
+ * returns the column and row of circle object at position given, 
+ * or -1 if no circle object is there
+ */
+function getCircleAt(x, y) {
+    let row = Math.floor(y / ((circleSize * 2) + CIRCLES_SPACING));
+
+    if((row < 0) || (row > circles.length - 1)) {
+        return -1;
+    }
+
+    for(let col = 0; col < circles[row].length; col++) {
+        let xdiff = Math.abs(circles[row][col].x - x);
+        let ydiff = Math.abs(circles[row][col].y - y);
+
+        let dist = Math.sqrt((xdiff * xdiff) + (ydiff * ydiff));
+
+        if(dist <= circleSize + CIRCLES_SPACING) {
+            return [col, row];
+        }
+    }
+
+    return -1;
 }
 
 function setMouseAngle(e) {
