@@ -3,6 +3,7 @@ body {
 }
 
 canvas {
+    border-radius: 10px;
     border: 4px solid black;
     background-color: #2E4053;
     position: absolute;
