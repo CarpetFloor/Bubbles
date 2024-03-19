@@ -224,13 +224,25 @@ function launch(e) {
     }
 }
 
+let border = true;
 function drawCircle(x, y, color, size) {
     r.fillStyle = color;
     r.beginPath();
     r.arc(x, y, 
         size, 
-        0, 2 * Math.PI);
+        0, 2 * Math.PI); 
     r.fill();
+
+    if(border) {
+        let borderColor = (parseInt("0x" + (color).replace("#", "")) - 20).toString(16);
+        
+        // if(!(isNaN(borderColor))) {
+        r.strokeStle = "#" + borderColor;
+        r.lineWidth = 4;
+        r.stroke();
+        // }
+    }
+
     r.closePath();
 }
 
