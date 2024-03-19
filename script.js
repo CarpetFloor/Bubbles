@@ -14,6 +14,11 @@ let launched = {
         this.x += this.moveX;
         this.y += this.moveY;
 
+        // bounce off wall
+        if((this.x > w - CIRCLE_SIZE) || (this.x < CIRCLE_SIZE)) {
+            this.moveX *= -1;
+        }
+
         drawCircle(this.x, this.y, "orchid");
     }
 };
