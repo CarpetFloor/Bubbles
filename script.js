@@ -77,6 +77,15 @@ let launched = {
 
         drawCircle(this.x, this.y, 
             currentColor, circleSize);
+        
+        let collisionCheck = getCircleAt(this.x, this.y);
+        this.moving = (collisionCheck == -1);
+
+        if(!(this.moving)) {
+            addCircleAt(collisionCheck[0], collisionCheck[1], currentColor);
+
+            currentColor = randomColor();
+        }
     }
 };
 
@@ -157,7 +166,7 @@ function initCircles() {
     }
 }
 
-let shiftOddRows = true;
+let shiftOddRows = false;
 function drawCircles() {
     let x = -1;
     let y = circleSize + CIRCLES_SPACING;
@@ -170,12 +179,14 @@ function drawCircles() {
         }
 
         for(let col = 0; col < circles[row].length; col++) {
-            drawCircle(
-                x, 
-                y, 
-                circles[row][col], 
-                circleSize
-            );
+            if(circles[row][col] != -1) {
+                drawCircle(
+                    x, 
+                    y, 
+                    circles[row][col], 
+                    circleSize
+                );
+            }
 
             x += (circleSize * 2) + CIRCLES_SPACING;
         }
@@ -185,7 +196,7 @@ function drawCircles() {
 }
 
 /**
- * returns the column and row of circle object at position given, 
+ * returns [row, col] of circle object at position given, 
  * or -1 if no circle object is there
  */
 function getCircleAt(x, y) {
@@ -195,18 +206,36 @@ function getCircleAt(x, y) {
         return -1;
     }
 
-    for(let col = 0; col < circles[row].length; col++) {
-        let xdiff = Math.abs(circles[row][col].x - x);
-        let ydiff = Math.abs(circles[row][col].y - y);
-
-        let dist = Math.sqrt((xdiff * xdiff) + (ydiff * ydiff));
-
-        if(dist <= circleSize + CIRCLES_SPACING) {
-            return [col, row];
-        }
+    let col = Math.floor(x / ((circleSize * 2) + CIRCLES_SPACING));
+    if(col > CIRCLES_MAX_COUNT_HORIZONTAL - 1) {
+        col == CIRCLES_MAX_COUNT_HORIZONTAL;
     }
 
-    return -1;
+    if(circles[row][col] == -1) {
+        return -1;
+    }
+
+    return [row, col];
+}
+
+function addCircleAt(row, col, color) {
+    console.log(color);
+    let actualRow = row + 1;
+
+    if(actualRow >= circles.length) {
+        let addedRow = [];
+
+        for(let i = 0; i < circles[0].length; i++) {
+            addedRow.push(-1);
+        }
+
+        circles.push(addedRow);
+    }
+
+    
+    circles[actualRow][col] = color;
+    // console.log(addedRow);
+    // console.log(circles[actualRow])
 }
 
 function setMouseAngle(e) {
@@ -237,20 +266,21 @@ function launch(e) {
             
             launched.moveX = Math.cos(mouseAngle) * LAUNCH_SPEED;
             launched.moveY = Math.sin(mouseAngle) * LAUNCH_SPEED;
-            // if pointing directly up, moveY will be negative
-            if(launched.moveY > 0) {
-                launched.moveY *= -1;
-            }
             
             if(!(mouseXpos)) {
-                launched.moveY *= -1;
                 launched.moveX *= -1;
+                launched.moveY *= -1;
+            }
+
+            // if pointing directly up, moveY will be negative
+            if(launched.moveY >= 0) {
+                launched.moveY = 0 - LAUNCH_SPEED;
             }
         }
     }
 }
 
-let border = true;
+let border = false;
 const BORDER_COLOR_DIFF = 40;
 const BORDER_SIZE = 2.5;
 let borderStyle = 1;
