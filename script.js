@@ -17,7 +17,11 @@ window.onload = () => {
 
     // circleSize = (CIRCLES_MAX_COUNT_HORIZONTAL + CIRCLES_SPACING);
     circleSize = w / (((CIRCLES_MAX_COUNT_HORIZONTAL + 1) * 2) + CIRCLES_SPACING);
+
+    launcherX = (w / 2) - (circleSize / 1) + CIRCLES_SPACING;
+    launcherY = h - (circleSize * 1) + CIRCLES_SPACING;
     aimer.smallerSize = circleSize / 3;
+    
     initCircles();
     
     c.addEventListener("mousemove", setMouseAngle);
@@ -54,6 +58,8 @@ let mouseAngle = 1.5708;
 let mouseXpos = false;
 const LAUNCH_SPEED = 8;
 
+let launcherX = -1;
+let launcherY = -1;
 let launched = {
     x: -1, 
     y: -1, 
@@ -79,8 +85,8 @@ let aimer = {
     spacing: 23, 
     count: 3, 
     draw: function() {
-        let x = (w / 2) - (circleSize / 2);
-        let y = h - (circleSize / 2);
+        let x = launcherX;
+        let y = launcherY;
 
         let firstMoveX = Math.cos(mouseAngle) * (circleSize / 1.75);
         let firstMoveY = Math.sin(mouseAngle) * (circleSize / 1.75);
@@ -135,49 +141,46 @@ function randomColor() {
     return colors.current[Math.floor((Math.random() * (max - min)) + min)];
 }
 
-function Circle(x, y, color) {
-    this.x = x;
-    this.y = y;
-    this.color = color;
-}
 let circles = [];
 
 function initCircles() {
-    let x = -1;
-    let y = circleSize + CIRCLES_SPACING;
     circles = [];
 
     for(let row = 0; row < CIRCLES_STARTING_ROWS_COUNT; row++) {
         let currentRow = [];
-
-        x = circleSize + CIRCLES_SPACING;
-
-        if(row % 2 == 1) {
-            x += circleSize + CIRCLES_SPACING;
-        }
     
         for(let col = 0; col < CIRCLES_MAX_COUNT_HORIZONTAL; col++) {
-            currentRow.push(new Circle(x, y, randomColor()));
+            currentRow.push(randomColor());
+        }
+
+        circles.push(currentRow);
+    }
+}
+
+let shiftOddRows = true;
+function drawCircles() {
+    let x = -1;
+    let y = circleSize + CIRCLES_SPACING;
+
+    for(let row = 0; row < circles.length; row++) {
+        x = circleSize + CIRCLES_SPACING;
+        
+        if(row % 2 == 1 && shiftOddRows) {
+            x += circleSize + CIRCLES_SPACING;
+        }
+
+        for(let col = 0; col < circles[row].length; col++) {
+            drawCircle(
+                x, 
+                y, 
+                circles[row][col], 
+                circleSize
+            );
 
             x += (circleSize * 2) + CIRCLES_SPACING;
         }
 
-        circles.push(currentRow);
-
         y += (circleSize * 2) + CIRCLES_SPACING;
-    }
-}
-
-function drawCircles() {
-    for(let row = 0; row < circles.length; row++) {
-        for(let col = 0; col < circles[row].length; col++) {
-            drawCircle(
-                circles[row][col].x, 
-                circles[row][col].y, 
-                circles[row][col].color, 
-                circleSize
-            );
-        }
     }
 }
 
@@ -208,8 +211,8 @@ function getCircleAt(x, y) {
 
 function setMouseAngle(e) {
     movedMouse = true;
-    let xdiff = e.offsetX - (w / 2);
-    let ydiff = e.offsetY - h;
+    let xdiff = e.offsetX - launcherX;
+    let ydiff = e.offsetY - launcherY;
 
     mouseXpos = xdiff > 0;
     
@@ -219,23 +222,30 @@ function setMouseAngle(e) {
 function launch(e) {
     // don't allow launching ball to horizontal to prevent bouncing back and forth horizontally
     if(!(launched.moving) && (e.offsetY < h - 100)) {
-        if(!(movedMouse)) {
-            let xdiff = e.offsetX - (w / 2);
-            let ydiff = e.offsetY - h;
-            
-            mouseAngle = Math.atan(ydiff / xdiff);
-        }
-
         launched.moving = true;
-        launched.x = (w / 2) - (circleSize / 2);
-        launched.y = h - (circleSize / 2);
-        
-        launched.moveX = Math.cos(mouseAngle) * LAUNCH_SPEED;
-        launched.moveY = Math.sin(mouseAngle) * LAUNCH_SPEED;
-        
-        if(!(mouseXpos)) {
-            launched.moveY *= -1;
-            launched.moveX *= -1;
+
+        if(!(movedMouse)) {
+            launched.x = launcherX;
+            launched.y = launcherY;
+            
+            launched.moveX = 0;
+            launched.moveY = 0 - LAUNCH_SPEED;
+        }
+        else {
+            launched.x = launcherX;
+            launched.y = launcherY;
+            
+            launched.moveX = Math.cos(mouseAngle) * LAUNCH_SPEED;
+            launched.moveY = Math.sin(mouseAngle) * LAUNCH_SPEED;
+            // if pointing directly up, moveY will be negative
+            if(launched.moveY > 0) {
+                launched.moveY *= -1;
+            }
+            
+            if(!(mouseXpos)) {
+                launched.moveY *= -1;
+                launched.moveX *= -1;
+            }
         }
     }
 }
