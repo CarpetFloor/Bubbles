@@ -4,7 +4,7 @@ let w, h;
 
 let debugMode = false;
 
-let shiftOddRows = false;
+let shiftOddRows = true;
 const CIRCLES_MAX_COUNT_HORIZONTAL = 18;
 const CIRCLES_STARTING_ROWS_COUNT = 8;
 const CIRCLES_SPACING = 3;
@@ -61,7 +61,7 @@ let movedMouse = false;
 // 90 degrees, start by aiming straight up (for aimer only)
 let mouseAngle = 1.5708;
 let mouseXpos = false;
-const LAUNCH_SPEED = 8;
+const LAUNCH_SPEED = 10;
 
 function findNextAvailInsert(row, col) {
     let insertRow = row;
@@ -311,7 +311,10 @@ function getDistance(fromX, fromY, toX, toY) {
  */
 function getCircleAt(x, y) {
     let row = Math.floor(y / space);
-    if((row < 0) || (row > circles.length - 1)) {
+    if(row < 0) {
+        row = 0;
+    }
+    if(row > circles.length - 1) {
         return -1;
     }
 
@@ -321,6 +324,9 @@ function getCircleAt(x, y) {
     }
 
     let col = Math.floor((x - xOffset) / space);
+    if(col < 0) {
+        col = 0;
+    }
     if(col > CIRCLES_MAX_COUNT_HORIZONTAL - 1) {
         col = CIRCLES_MAX_COUNT_HORIZONTAL - 1;
     }
