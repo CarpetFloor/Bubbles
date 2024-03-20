@@ -347,9 +347,54 @@ function addCircleAt(row, col, color) {
 
         circles.push(addedRow);
     }
-
     
     circles[row][col] = color;
+
+    checkForDeletes(row, col, color);
+}
+
+function getAdjacents(row, col, color, excludes) {
+    let adjacents = [];
+
+    let colChecks = [0];
+    let rowChecks = [0];
+
+    if(col > 0){
+        colChecks.push(-1);
+    }
+    if(col < circles[0].length - 1){
+        colChecks.push(1);
+    }
+    if(row > 0){
+        rowChecks.push(-1);
+    }
+    if(row < colors.length - 1){
+        rowChecks.push(1);
+    }
+
+    for(let r = -1; r < 2; r++) {
+        for(let c = -1; c < 2; c++) {
+            if((colChecks.includes(c) && rowChecks.includes(r)) && 
+                !(r == 0 && c == 0)) {
+
+                if(!(excludes.includes([row + r, col + c]))) {
+
+                    if(circles[row + r][col + c] == color) {
+                        adjacents.push([row + r, col + c]);
+                    }
+
+                }
+
+            }
+        }
+    }
+
+    return adjacents;
+}
+
+function checkForDeletes(row, col, color) {
+    let adjacents = getAdjacents(row, col, color, []);
+    console.log(adjacents)
 }
 
 function setMouseAngle(e) {
