@@ -82,8 +82,37 @@ let launched = {
         this.moving = (collisionCheck == -1);
 
         if(!(this.moving)) {
-            addCircleAt(collisionCheck[0], collisionCheck[1], currentColor);
+            /**
+             * the idea is check for collision, and if found then simply place 
+             * the new circle directly below the collided. However, issues 
+             * arise when a single tower is made and one of the middle 
+             * circles is collided with: placing the new circle directly 
+             * behind will place the new circle in a spot that already has 
+             * a circle. So, instead have to check if the sport directly 
+             * below is also a circle, and if it is, then place the new 
+             * circle in the direction that is closer to where the circle 
+             * was launched from
+             */
 
+            let insertRow = collisionCheck[0];
+            let insertCol = collisionCheck[1];
+            
+            let x = collisionCheck[1] * (circleSize + CIRCLES_SPACING) * 2;
+            let y = (collisionCheck[0] + 1) * (circleSize + CIRCLES_SPACING) * 2;
+
+            
+            let belowCheck = getCircleAt(x, y);
+            if(belowCheck != -1) {
+                if(launcherX > x) {
+                    insertCol += 1;
+                }
+                else {
+                    insertCol -= 1;
+                }
+            }
+
+            
+            addCircleAt(insertRow, insertCol, currentColor);
             currentColor = randomColor();
         }
     }
@@ -195,11 +224,24 @@ function drawCircles() {
     }
 }
 
+function getDistance(fromX, fromY, toX, toY) {
+    let xdiff = Math.abs(toX - fromX);
+    let ydiff = Math.abs(toY - fromY);
+    
+    xdiff *= xdiff;
+    ydiff *= ydiff;
+
+    return Math.sqrt(xdiff + ydiff);
+}
+
 /**
  * returns [row, col] of circle object at position given, 
  * or -1 if no circle object is there
  */
 function getCircleAt(x, y) {
+    /*
+    let space = (circleSize * 2) + CIRCLES_SPACING;
+
     let row = Math.floor(y / ((circleSize * 2) + CIRCLES_SPACING));
 
     if((row < 0) || (row > circles.length - 1)) {
@@ -207,19 +249,81 @@ function getCircleAt(x, y) {
     }
 
     let col = Math.floor(x / ((circleSize * 2) + CIRCLES_SPACING));
-    if(col > CIRCLES_MAX_COUNT_HORIZONTAL - 1) {
-        col == CIRCLES_MAX_COUNT_HORIZONTAL;
+    if(col >= CIRCLES_MAX_COUNT_HORIZONTAL) {
+        col = CIRCLES_MAX_COUNT_HORIZONTAL - 1;
     }
 
     if(circles[row][col] == -1) {
+        let onleft = false;
+        if(col > 0) {
+            onleft = (circles[row][col - 1] != -1);
+        }
+
+        let onright = false;
+        if(col < CIRCLES_MAX_COUNT_HORIZONTAL - 2) {
+            onright = (circles[row][col + 1] != -1);
+        }
+
+        let middle = (col * space) + space / 2;
+        let check = x - middle;
+
+        if((check >= space * 0.25) && onright) {
+            console.log("right collision!")
+            return [row, col + 1];
+        }
+        if((check <= space * -0.25) && onleft) {
+            console.log("left collision!")
+            return [row, col - 1];
+        }
+
         return -1;
     }
 
+    console.log("we are here");
+    let onleft = false;
+    if(col > 0) {
+        onleft = (circles[row - 200][col - 1] != -1);
+    }
+
+    let onright = false;
+    if(col < CIRCLES_MAX_COUNT_HORIZONTAL - 2) {
+        onright = (circles[row - 200][col + 1] != -1);
+    }
+    console.log(onleft, onright)
     return [row, col];
+    */
+    let space = (circleSize + CIRCLES_SPACING) * 2;
+    let row = Math.floor(y / space);
+
+    if((row < 0) || (row > circles.length - 1)) {
+        return -1;
+    }
+
+    let smallest = -1;
+    let closestCol = -1;
+
+    for(let col = 0; col < circles[row].length; col++) {
+        let distance = getDistance(
+            col * space, 
+            row * space, 
+            x, 
+            y, 
+        );
+
+        if((distance < smallest) || (smallest == -1)) {
+            smallest = distance;
+            closestCol = col;
+        }
+    }
+
+    if(circles[row][closestCol] == -1) {
+        return -1;
+    }
+
+    return [row, closestCol];
 }
 
 function addCircleAt(row, col, color) {
-    console.log(color);
     let actualRow = row + 1;
 
     if(actualRow >= circles.length) {
@@ -234,8 +338,6 @@ function addCircleAt(row, col, color) {
 
     
     circles[actualRow][col] = color;
-    // console.log(addedRow);
-    // console.log(circles[actualRow])
 }
 
 function setMouseAngle(e) {
@@ -252,6 +354,7 @@ function launch(e) {
     // don't allow launching ball to horizontal to prevent bouncing back and forth horizontally
     if(!(launched.moving) && (e.offsetY < h - 100)) {
         launched.moving = true;
+        let debug = getCircleAt(e.offsetX, e.offsetY);
 
         if(!(movedMouse)) {
             launched.x = launcherX;
