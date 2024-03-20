@@ -22,7 +22,23 @@ window.onload = () => {
     
     c.addEventListener("mousemove", setMouseAngle);
     c.addEventListener("click", launch);
-    window.setInterval(loop, 1000 / 30);
+    window.setInterval(loop, 1000 / 60);
+}
+
+function offsetHex(hex, offset) {
+    let red = parseInt("0x" + hex[1] + hex[2]) + offset;
+    if(red < 0) {red = 0;}
+    if(red > 255) {red = 255;}
+    
+    let green = parseInt("0x" + hex[3] + hex[4]) + offset;
+    if(green < 0) {green = 0;}
+    if(green > 255) {green = 255;}
+    
+    let blue = parseInt("0x" + hex[5] + hex[6]) + offset;
+    if(blue < 0) {blue = 0;}
+    if(blue > 255) {blue = 255;}
+
+    return "#" + red.toString(16) + green.toString(16) + blue.toString(16);
 }
 
 /**
@@ -36,7 +52,7 @@ let movedMouse = false;
 // 90 degrees, start by aiming straight up (for aimer only)
 let mouseAngle = 1.5708;
 let mouseXpos = false;
-const LAUNCH_SPEED = 15;
+const LAUNCH_SPEED = 8;
 
 let launched = {
     x: -1, 
@@ -86,16 +102,16 @@ let aimer = {
         x += firstMoveX;
         y += firstMoveY;
 
-        let color = 255;
+        let color = currentColor;
 
         for(let i = 0; i < this.count; i++) {
             x += moveX;
             y += moveY;
 
-            color -= 30;
+            color = offsetHex(color, -30);
 
             drawCircle(x, y, 
-                "rgb(" + color + "," + color + "," + color + ")", this.smallerSize);
+                color, this.smallerSize);
         }
     }   
 }
@@ -225,6 +241,9 @@ function launch(e) {
 }
 
 let border = true;
+const BORDER_COLOR_DIFF = 40;
+const BORDER_SIZE = 2.5;
+let borderStyle = 1;
 function drawCircle(x, y, color, size) {
     r.fillStyle = color;
     r.beginPath();
@@ -234,19 +253,26 @@ function drawCircle(x, y, color, size) {
     r.fill();
 
     if(border) {
-        let borderColor = (parseInt("0x" + (color).replace("#", "")) - 20).toString(16);
         
-        // if(!(isNaN(borderColor))) {
-        r.strokeStle = "#" + borderColor;
-        r.lineWidth = 4;
+        if(borderStyle == 0) {
+            r.strokeStyle = offsetHex(color, 0 - BORDER_COLOR_DIFF);
+            r.lineWidth = BORDER_SIZE;
+        }
+        else {
+            r.strokeStyle = "Black"
+            r.lineWidth = 3;
+        }
+
         r.stroke();
-        // }
+        r.closePath();
     }
 
     r.closePath();
 }
 
 function loop() {
+    let frameStart = Date.now();
+
     r.clearRect(0, 0, w, h);
 
     drawCircles();
@@ -258,4 +284,6 @@ function loop() {
     else {
         aimer.draw();
     }
+
+    let frameEnd = Date.now();
 }
