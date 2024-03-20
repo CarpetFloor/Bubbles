@@ -2,6 +2,9 @@ let c;
 let r;
 let w, h;
 
+let debugMode = true;
+
+let shiftOddRows = false;
 const CIRCLES_MAX_COUNT_HORIZONTAL = 18;
 const CIRCLES_STARTING_ROWS_COUNT = 9;
 const CIRCLES_SPACING = 3;
@@ -195,7 +198,6 @@ function initCircles() {
     }
 }
 
-let shiftOddRows = false;
 function drawCircles() {
     let x = -1;
     let y = circleSize + CIRCLES_SPACING;
@@ -215,6 +217,11 @@ function drawCircles() {
                     circles[row][col], 
                     circleSize
                 );
+
+                if(debugMode) {
+                    r.fillStyle = "yellow";
+                    r.fillRect(x - (10 / 2), y - (10 / 2), 10, 10);
+                }
             }
 
             x += (circleSize * 2) + CIRCLES_SPACING;
@@ -239,60 +246,7 @@ function getDistance(fromX, fromY, toX, toY) {
  * or -1 if no circle object is there
  */
 function getCircleAt(x, y) {
-    /*
     let space = (circleSize * 2) + CIRCLES_SPACING;
-
-    let row = Math.floor(y / ((circleSize * 2) + CIRCLES_SPACING));
-
-    if((row < 0) || (row > circles.length - 1)) {
-        return -1;
-    }
-
-    let col = Math.floor(x / ((circleSize * 2) + CIRCLES_SPACING));
-    if(col >= CIRCLES_MAX_COUNT_HORIZONTAL) {
-        col = CIRCLES_MAX_COUNT_HORIZONTAL - 1;
-    }
-
-    if(circles[row][col] == -1) {
-        let onleft = false;
-        if(col > 0) {
-            onleft = (circles[row][col - 1] != -1);
-        }
-
-        let onright = false;
-        if(col < CIRCLES_MAX_COUNT_HORIZONTAL - 2) {
-            onright = (circles[row][col + 1] != -1);
-        }
-
-        let middle = (col * space) + space / 2;
-        let check = x - middle;
-
-        if((check >= space * 0.25) && onright) {
-            console.log("right collision!")
-            return [row, col + 1];
-        }
-        if((check <= space * -0.25) && onleft) {
-            console.log("left collision!")
-            return [row, col - 1];
-        }
-
-        return -1;
-    }
-
-    console.log("we are here");
-    let onleft = false;
-    if(col > 0) {
-        onleft = (circles[row - 200][col - 1] != -1);
-    }
-
-    let onright = false;
-    if(col < CIRCLES_MAX_COUNT_HORIZONTAL - 2) {
-        onright = (circles[row - 200][col + 1] != -1);
-    }
-    console.log(onleft, onright)
-    return [row, col];
-    */
-    let space = (circleSize + CIRCLES_SPACING) * 2;
     let row = Math.floor(y / space);
 
     if((row < 0) || (row > circles.length - 1)) {
@@ -310,7 +264,9 @@ function getCircleAt(x, y) {
             y, 
         );
 
-        if((distance < smallest) || (smallest == -1)) {
+        console.log(col, distance)
+
+        if((distance < (smallest - 5)) || (smallest == -1)) {
             smallest = distance;
             closestCol = col;
         }
@@ -426,6 +382,25 @@ function loop() {
     // aiming
     else {
         aimer.draw();
+    }
+
+    if(debugMode) {
+        r.fillStyle = "black";
+        
+        let x = launcherX;
+        let y = launcherY;
+
+        if(launched.moving) {
+            x = launched.x;
+            y = launched.y;
+        }
+
+        r.fillRect(
+            x - (10 / 2), 
+            y - (10 / 2), 
+            10, 
+            10
+        );
     }
 
     let frameEnd = Date.now();
