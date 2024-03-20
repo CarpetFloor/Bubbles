@@ -2,13 +2,14 @@ let c;
 let r;
 let w, h;
 
-let debugMode = true;
+let debugMode = false;
 
 let shiftOddRows = false;
 const CIRCLES_MAX_COUNT_HORIZONTAL = 18;
-const CIRCLES_STARTING_ROWS_COUNT = 9;
+const CIRCLES_STARTING_ROWS_COUNT = 8;
 const CIRCLES_SPACING = 3;
 let circleSize = -1;
+let space;
 
 window.onload = () => {
     c = document.querySelector("canvas");
@@ -20,6 +21,7 @@ window.onload = () => {
 
     // circleSize = (CIRCLES_MAX_COUNT_HORIZONTAL + CIRCLES_SPACING);
     circleSize = w / (((CIRCLES_MAX_COUNT_HORIZONTAL + 1) * 2) + CIRCLES_SPACING);
+    space = (circleSize * 2) + CIRCLES_SPACING;
 
     launcherX = (w / 2) - (circleSize / 1) + CIRCLES_SPACING;
     launcherY = h - (circleSize * 1) + CIRCLES_SPACING;
@@ -61,8 +63,92 @@ let mouseAngle = 1.5708;
 let mouseXpos = false;
 const LAUNCH_SPEED = 8;
 
+function findNextAvailInsert(row, col) {
+    let insertRow = row;
+    let insertCol = col;
+
+    if(debugMode) {
+        console.log("insertRow START", insertRow)
+    }
+
+    let xcheck = insertCol * space;
+    let ycheck = insertRow * space;
+
+    let diff = Math.abs(launched.x - launcherX);
+
+    let leftOpen = false;
+    if(insertCol > 0) {
+        let check = getCircleAt(xcheck - space, ycheck)
+        leftOpen = (check == -1);
+    }
+
+    let rightOpen = false;
+    if(insertCol < circles[0].length - 2) {
+        let check = getCircleAt(xcheck + space, ycheck);
+        rightOpen = (check == -1);
+    }
+
+    if(debugMode) {
+        console.log("opens?", leftOpen, rightOpen)
+    }
+    
+    let middleInsert = true;
+    if(diff > 150) {
+        if(leftOpen && (launched.x > launcherX)) {
+            if(debugMode) {
+                console.log("left insert");
+            }
+
+            middleInsert = false;
+            // insertRow -= 1;
+            insertCol -= 1;
+        }
+        else if(rightOpen && (launcherX > launched.x)) {
+            if(debugMode) {
+                console.log("right insert");
+            }
+
+            middleInsert = false;
+            // insertRow -= 1;
+            insertCol += 1;
+        }
+    }
+    
+    if(middleInsert) {
+        if(debugMode) {
+            console.log("middle insert");            
+        }
+
+        insertRow += 1;
+
+        let finalCheck = getCircleAt(
+            insertCol * space, 
+            (insertRow) * space
+        )
+
+        if(debugMode) {
+            console.log("checks, ", finalCheck);
+        }
+
+        if(finalCheck != -1) {
+            if(debugMode) {
+                console.log("DOING IT!");
+            }
+
+            return findNextAvailInsert(insertRow, insertCol);
+        }
+    }
+
+    if(debugMode) {
+        console.log("insertRow END", insertRow);
+    }
+
+    return [insertRow, insertCol];
+}
+
 let launcherX = -1;
 let launcherY = -1;
+
 let launched = {
     x: -1, 
     y: -1, 
@@ -81,41 +167,19 @@ let launched = {
         drawCircle(this.x, this.y, 
             currentColor, circleSize);
         
-        let collisionCheck = getCircleAt(this.x, this.y);
+        let collisionCheck = getCircleAt(this.x, this.y - space);
+
+        if(debugMode) {
+            console.log(collisionCheck)
+        }
+        
         this.moving = (collisionCheck == -1);
 
         if(!(this.moving)) {
-            /**
-             * the idea is check for collision, and if found then simply place 
-             * the new circle directly below the collided. However, issues 
-             * arise when a single tower is made and one of the middle 
-             * circles is collided with: placing the new circle directly 
-             * behind will place the new circle in a spot that already has 
-             * a circle. So, instead have to check if the sport directly 
-             * below is also a circle, and if it is, then place the new 
-             * circle in the direction that is closer to where the circle 
-             * was launched from
-             */
+            let insertAt = findNextAvailInsert(collisionCheck[0], collisionCheck[1]);
 
-            let insertRow = collisionCheck[0];
-            let insertCol = collisionCheck[1];
-            
-            let x = collisionCheck[1] * (circleSize + CIRCLES_SPACING) * 2;
-            let y = (collisionCheck[0] + 1) * (circleSize + CIRCLES_SPACING) * 2;
+            addCircleAt(insertAt[0], insertAt[1], currentColor);
 
-            
-            let belowCheck = getCircleAt(x, y);
-            if(belowCheck != -1) {
-                if(launcherX > x) {
-                    insertCol += 1;
-                }
-                else {
-                    insertCol -= 1;
-                }
-            }
-
-            
-            addCircleAt(insertRow, insertCol, currentColor);
             currentColor = randomColor();
         }
     }
@@ -246,43 +310,29 @@ function getDistance(fromX, fromY, toX, toY) {
  * or -1 if no circle object is there
  */
 function getCircleAt(x, y) {
-    let space = (circleSize * 2) + CIRCLES_SPACING;
     let row = Math.floor(y / space);
-
     if((row < 0) || (row > circles.length - 1)) {
         return -1;
     }
 
-    let smallest = -1;
-    let closestCol = -1;
-
-    for(let col = 0; col < circles[row].length; col++) {
-        let distance = getDistance(
-            col * space, 
-            row * space, 
-            x, 
-            y, 
-        );
-
-        console.log(col, distance)
-
-        if((distance < (smallest - 5)) || (smallest == -1)) {
-            smallest = distance;
-            closestCol = col;
-        }
+    let xOffset = 0;
+    if((row % 2 == 0) && (shiftOddRows)) {
+        xOffset = space / 2;
     }
 
-    if(circles[row][closestCol] == -1) {
+    let col = Math.floor((x - xOffset) / space);
+    if(col > CIRCLES_MAX_COUNT_HORIZONTAL - 1) {
+        col = CIRCLES_MAX_COUNT_HORIZONTAL - 1;
+    }
+    if(circles[row][col] == -1) {
         return -1;
     }
 
-    return [row, closestCol];
+    return [row, col];
 }
 
 function addCircleAt(row, col, color) {
-    let actualRow = row + 1;
-
-    if(actualRow >= circles.length) {
+    if(row > circles.length - 1) {
         let addedRow = [];
 
         for(let i = 0; i < circles[0].length; i++) {
@@ -293,7 +343,7 @@ function addCircleAt(row, col, color) {
     }
 
     
-    circles[actualRow][col] = color;
+    circles[row][col] = color;
 }
 
 function setMouseAngle(e) {
@@ -310,7 +360,7 @@ function launch(e) {
     // don't allow launching ball to horizontal to prevent bouncing back and forth horizontally
     if(!(launched.moving) && (e.offsetY < h - 100)) {
         launched.moving = true;
-        let debug = getCircleAt(e.offsetX, e.offsetY);
+        // let debug = getCircleAt(e.offsetX, e.offsetY);
 
         if(!(movedMouse)) {
             launched.x = launcherX;
