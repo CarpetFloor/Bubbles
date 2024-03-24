@@ -364,23 +364,14 @@ function addCircleAt(row, col, color) {
     checkForDeletes(row, col, color);
 }
 
-// commons: left, right, up, down
-// right checks: up-right, down-right
-// other checks: up-left, down-left
 function getAdjacents(row, col, color) {
     let already = alreadyFound.split(".");
     let adjacents = "";
 
-    // console.log(row, col)
-    // console.log(circles[row][col], color)
-    // if(colors[row][col] == color) {
-    //     adjacents == "[" + row + ", " + col + "].";
-    // }
-
     let notFarthestLeft = false;
     let notFarthestRight = false;
     let notFarthestUp = false;
-    let notFarthestDown = false;    
+    let notFarthestDown = false;
 
     // left
     if(col > 0){
@@ -442,7 +433,7 @@ function getAdjacents(row, col, color) {
     // ----------------------------------------
 
     // top-left
-    if(notFarthestUp && notFarthestLeft) {
+    if(notFarthestUp && notFarthestLeft && (row % 2 == 0)) {
         let sameColor = (circles[row - 1][col - 1] == color);
         if(sameColor && !(already.includes((row - 1) + ", " + (col - 1)))) {
             alreadyFound += (row - 1) + ", " + (col - 1) + ".";
@@ -455,7 +446,7 @@ function getAdjacents(row, col, color) {
     }
 
     // top-right
-    if(notFarthestUp && notFarthestRight) {
+    if(notFarthestUp && notFarthestRight && (row % 2 == 1)) {
         let sameColor = (circles[row - 1][col + 1] == color);
         if(sameColor && !(already.includes((row - 1) + ", " + (col + 1)))) {
             alreadyFound += (row - 1) + ", " + (col + 1) + ".";
@@ -468,7 +459,7 @@ function getAdjacents(row, col, color) {
     }
 
     // bottom-left
-    if(notFarthestDown && notFarthestLeft) {
+    if(notFarthestDown && notFarthestLeft && (row % 2 == 0)) {
         let sameColor = (circles[row + 1][col - 1] == color);
         if(sameColor && !(already.includes((row + 1) + ", " + (col - 1)))) {
             alreadyFound += (row + 1) + ", " + (col - 1) + ".";
@@ -481,7 +472,7 @@ function getAdjacents(row, col, color) {
     }
 
     // bottom-right
-    if(notFarthestDown && notFarthestRight) {
+    if(notFarthestDown && notFarthestRight && (row % 2 == 1)) {
         let sameColor = (circles[row + 1][col + 1] == color);
         if(sameColor && !(already.includes((row + 1) + ", " + (col + 1)))) {
             alreadyFound += (row + 1) + ", " + (col + 1) + ".";
