@@ -1,2 +1,19 @@
 -Circles on the left side have a tendency to get placed on the right
 -Cannot place circle in between two other circles
+-When circle lands to the right of where aiming at, and keep firing aiming at the same spot will 
+    keep going in the same spot and replacing the circle that is already there
+-Fix circles not getting placed on the correct spot
+-Circles moving down system:
+    >Start with 6 "lives"
+    >Causing any number of circles to get removed does not remove a "life"
+    >When a circle is placed that does not remove any circles, a "life" is removed
+    >If "lifes" gets to 0, then move all circles down and reset "lifes"
+-Place launcher below where the last row of game is (aimer can go above thought)
+-Lose game if a circle reaches bottom
+-Score, with more points better with more circles removed (meaning that removing 
+    5 circles with one circle is more points that removing 1 circle with one circle 
+    five times)
+-Fancy animations:
+    >Launched circle impact (different than removing )
+    >Remove circles animation
+    >Move circles down animation
