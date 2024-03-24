@@ -3,6 +3,7 @@ let r;
 let w, h;
 
 let debugMode = false;
+let drawRowCols = true;
 
 let shiftOddRows = true;
 const CIRCLES_MAX_COUNT_HORIZONTAL = 18;
@@ -286,6 +287,16 @@ function drawCircles() {
                     r.fillStyle = "yellow";
                     r.fillRect(x - (10 / 2), y - (10 / 2), 10, 10);
                 }
+
+                if(drawRowCols) {
+                    r.font = "bold 12px Arial";
+                    r.fillStyle = "White";
+                    r.fillText(row + "," + col, x - (10 / 2) - 3, y - (10 / 2) - 2)
+
+                    r.font = "bold 12px Arial";
+                    r.fillStyle = "Black";
+                    r.fillText(row + "," + col, x - (10 / 2) - 3, y - (10 / 2) - 2);
+                }
             }
 
             x += (circleSize * 2) + CIRCLES_SPACING;
@@ -353,48 +364,160 @@ function addCircleAt(row, col, color) {
     checkForDeletes(row, col, color);
 }
 
-function getAdjacents(row, col, color, excludes) {
-    let adjacents = [];
+// commons: left, right, up, down
+// right checks: up-right, down-right
+// other checks: up-left, down-left
+function getAdjacents(row, col, color) {
+    let already = alreadyFound.split(".");
+    let adjacents = "";
 
-    let colChecks = [0];
-    let rowChecks = [0];
+    // console.log(row, col)
+    // console.log(circles[row][col], color)
+    // if(colors[row][col] == color) {
+    //     adjacents == "[" + row + ", " + col + "].";
+    // }
 
+    let notFarthestLeft = false;
+    let notFarthestRight = false;
+    let notFarthestUp = false;
+    let notFarthestDown = false;    
+
+    // left
     if(col > 0){
-        colChecks.push(-1);
+        notFarthestLeft = true;
+        let sameColor = (circles[row + 0][col - 1] == color);
+        if(sameColor && !(already.includes((row + 0) + ", " + (col - 1)))) {
+            alreadyFound += (row + 0) + ", " + (col - 1) + ".";
+            notFarthestLeft = true;
+            adjacents += "[" + (row + 0) + ", " + (col - 1) + "]."
+            
+            if(circles[row + 0][col - 1] == color) {
+                adjacents += getAdjacents(row + 0, col - 1, color);
+            }
+        }
     }
+    // right
     if(col < circles[0].length - 1){
-        colChecks.push(1);
+        notFarthestRight = true;
+        let sameColor = (circles[row + 0][col + 1] == color);
+        if(sameColor && !(already.includes((row + 0) + ", " + (col + 1)))) {
+            alreadyFound += (row + 0) + ", " + (col + 1) + ".";
+            notFarthestRight = true;
+            adjacents += "[" + (row + 0) + ", " + (col + 1) + "]."
+            
+            if(circles[row + 0][col + 1] == color) {
+                adjacents += getAdjacents(row + 0, col + 1, color);
+            }
+        }
     }
+    // up
     if(row > 0){
-        rowChecks.push(-1);
+        notFarthestUp = true;
+        let sameColor = (circles[row - 1][col + 0] == color);
+        if(sameColor && !(already.includes((row - 1) + ", " + (col + 0)))) {
+            alreadyFound += (row - 1) + ", " + (col + 0) + ".";
+            notFarthestUp = true;
+            adjacents += "[" + (row - 1) + ", " + (col + 0) + "]."
+            
+            if(circles[row - 1][col + 0] == color) {
+                adjacents += getAdjacents(row - 1, col + 0, color);
+            }
+        }
     }
+    // down
     if(row < colors.length - 1){
-        rowChecks.push(1);
-    }
-
-    for(let r = -1; r < 2; r++) {
-        for(let c = -1; c < 2; c++) {
-            if((colChecks.includes(c) && rowChecks.includes(r)) && 
-                !(r == 0 && c == 0)) {
-
-                if(!(excludes.includes([row + r, col + c]))) {
-
-                    if(circles[row + r][col + c] == color) {
-                        adjacents.push([row + r, col + c]);
-                    }
-
-                }
-
+        notFarthestDown = true;
+        let sameColor = (circles[row + 1][col + 0] == color);
+        if(sameColor && !(already.includes((row + 1) + ", " + (col + 0)))) {
+            alreadyFound += (row + 1) + ", " + (col + 0) + ".";
+            notFarthestDown = true;
+            adjacents += "[" + (row + 1) + ", " + (col + 0) + "]."
+            
+            if(circles[row + 1][col + 0] == color) {
+                adjacents += getAdjacents(row + 1, col + 0, color);
             }
         }
     }
 
+    // ----------------------------------------
+
+    // top-left
+    if(notFarthestUp && notFarthestLeft) {
+        let sameColor = (circles[row - 1][col - 1] == color);
+        if(sameColor && !(already.includes((row - 1) + ", " + (col - 1)))) {
+            alreadyFound += (row - 1) + ", " + (col - 1) + ".";
+            adjacents += "[" + (row - 1) + ", " + (col - 1) + "]."
+            
+            if(circles[row - 1][col - 1] == color) {
+                adjacents += getAdjacents(row - 1, col - 1, color);
+            }
+        }
+    }
+
+    // top-right
+    if(notFarthestUp && notFarthestRight) {
+        let sameColor = (circles[row - 1][col + 1] == color);
+        if(sameColor && !(already.includes((row - 1) + ", " + (col + 1)))) {
+            alreadyFound += (row - 1) + ", " + (col + 1) + ".";
+            adjacents += "[" + (row - 1) + ", " + (col + 1) + "]."
+            
+            if(circles[row - 1][col + 1] == color) {
+                adjacents += getAdjacents(row - 1, col + 1, color);
+            }
+        }
+    }
+
+    // bottom-left
+    if(notFarthestDown && notFarthestLeft) {
+        let sameColor = (circles[row + 1][col - 1] == color);
+        if(sameColor && !(already.includes((row + 1) + ", " + (col - 1)))) {
+            alreadyFound += (row + 1) + ", " + (col - 1) + ".";
+            adjacents += "[" + (row + 1) + ", " + (col - 1) + "]."
+            
+            if(circles[row + 1][col - 1] == color) {
+                adjacents += getAdjacents(row + 1, col - 1, color);
+            }
+        }
+    }
+
+    // bottom-right
+    if(notFarthestDown && notFarthestRight) {
+        let sameColor = (circles[row + 1][col + 1] == color);
+        if(sameColor && !(already.includes((row + 1) + ", " + (col + 1)))) {
+            alreadyFound += (row + 1) + ", " + (col + 1) + ".";
+            adjacents += "[" + (row + 1) + ", " + (col + 1) + "]."
+            
+            if(circles[row + 1][col + 1] == color) {
+                adjacents += getAdjacents(row + 1, col + 1, color);
+            }
+        }
+    }
+
+    
     return adjacents;
 }
 
+let alreadyFound = [];
 function checkForDeletes(row, col, color) {
-    let adjacents = getAdjacents(row, col, color, []);
-    console.log(adjacents)
+    alreadyFound = "";
+    
+    let adjacents = getAdjacents(row, col, color);
+    let adjacentArray = adjacents.split(".");
+    
+    // last elem is the empty string
+    --adjacentArray.length;
+    
+    // for some reason duplicates sometimes show up, so remove duplicates
+    let removeDuplicates = [];
+    for(let check of adjacentArray) {
+        if(!(removeDuplicates.includes(check))) {
+            removeDuplicates.push(check);
+        }
+    }
+
+    adjacentArray = removeDuplicates;
+    
+    console.log(adjacentArray)
 }
 
 function setMouseAngle(e) {

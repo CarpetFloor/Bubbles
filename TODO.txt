@@ -1,0 +1,2 @@
+-Circles on the left side have a tendency to get placed on the right
+-Cannot place circle in between two other circles
