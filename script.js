@@ -25,7 +25,7 @@ window.onload = () => {
     space = (circleSize * 2) + CIRCLES_SPACING;
 
     launcherX = (w / 2) - (circleSize / 1) + CIRCLES_SPACING;
-    launcherY = h - (circleSize * 1) + CIRCLES_SPACING;
+    launcherY = h - (circleSize * 1) - CIRCLES_SPACING;
     aimer.smallerSize = circleSize / 3;
     
     initCircles();
@@ -62,86 +62,47 @@ let movedMouse = false;
 // 90 degrees, start by aiming straight up (for aimer only)
 let mouseAngle = 1.5708;
 let mouseXpos = false;
-const LAUNCH_SPEED = 10;
+const LAUNCH_SPEED = 22;
 
 function findNextAvailInsert(row, col) {
     let insertRow = row;
     let insertCol = col;
 
-    if(debugMode) {
-        console.log("insertRow START", insertRow)
+    ++insertRow;
+
+    // make sure that when buliding single-width tower, it curves into center
+    if((insertRow == circles.length - 1) && (circles[insertRow][insertCol] != -1)) {
+        ++insertRow;
+
+        if(launched.x > launcherX) {
+            if(insertRow % 2 == 1) {
+                --insertCol;
+            }
+        }
+        else {
+            if(insertRow % 2 == 0) {
+                ++insertCol;
+            }
+        }
     }
 
-    let xcheck = insertCol * space;
-    let ycheck = insertRow * space;
-
-    let diff = Math.abs(launched.x - launcherX);
-
-    let leftOpen = false;
-    if(insertCol > 0) {
-        let check = getCircleAt(xcheck - space, ycheck)
-        leftOpen = (check == -1);
-    }
-
-    let rightOpen = false;
-    if(insertCol < circles[0].length - 2) {
-        let check = getCircleAt(xcheck + space, ycheck);
-        rightOpen = (check == -1);
-    }
-
-    if(debugMode) {
-        console.log("opens?", leftOpen, rightOpen)
-    }
-    
-    let middleInsert = true;
-    if(diff > 150) {
-        if(leftOpen && (launched.x > launcherX)) {
-            if(debugMode) {
-                console.log("left insert");
+    // incase aiming at same spot to make single-width tower, but hit not end
+    if(insertRow < circles.length) {
+        if(circles[insertRow][insertCol] != -1) {
+            --insertRow;
+        while(circles[insertRow][insertCol] != -1) {
+            if(launched.x > launcherX) {
+                --insertCol;
+            }
+            else {
+                ++insertCol;
             }
 
-            middleInsert = false;
-            // insertRow -= 1;
-            insertCol -= 1;
-        }
-        else if(rightOpen && (launcherX > launched.x)) {
-            if(debugMode) {
-                console.log("right insert");
+            if(circles[insertRow][insertCol] != -1) {
+                ++insertRow;
             }
-
-            middleInsert = false;
-            // insertRow -= 1;
-            insertCol += 1;
         }
-    }
-    
-    if(middleInsert) {
-        if(debugMode) {
-            console.log("middle insert");            
         }
-
-        insertRow += 1;
-
-        let finalCheck = getCircleAt(
-            insertCol * space, 
-            (insertRow) * space
-        )
-
-        if(debugMode) {
-            console.log("checks, ", finalCheck);
-        }
-
-        if(finalCheck != -1) {
-            if(debugMode) {
-                console.log("DOING IT!");
-            }
-
-            return findNextAvailInsert(insertRow, insertCol);
-        }
-    }
-
-    if(debugMode) {
-        console.log("insertRow END", insertRow);
     }
 
     return [insertRow, insertCol];
@@ -177,8 +138,11 @@ let launched = {
         this.moving = (collisionCheck == -1);
 
         if(!(this.moving)) {
-            let insertAt = findNextAvailInsert(collisionCheck[0], collisionCheck[1]);
+            if(drawRowCols) {
+                console.log("collided with ", collisionCheck[0], collisionCheck[1]);
+            }
 
+            let insertAt = findNextAvailInsert(collisionCheck[0], collisionCheck[1]);
             addCircleAt(insertAt[0], insertAt[1], currentColor);
 
             currentColor = randomColor();
@@ -361,7 +325,7 @@ function addCircleAt(row, col, color) {
     
     circles[row][col] = color;
 
-    checkForDeletes(row, col, color);
+    // checkForDeletes(row, col, color);
 }
 
 function getAdjacents(row, col, color) {
@@ -506,7 +470,9 @@ function checkForDeletes(row, col, color) {
         }
     }
 
-    console.log(adjacentArray);
+    if(drawRowCols) {
+        console.log("", adjacentArray);
+    }
 
     adjacentArray = removeDuplicates;
     if(adjacentArray.length > 1) {
@@ -536,8 +502,11 @@ function launch(e) {
     // don't allow launching ball to horizontal to prevent bouncing back and forth horizontally
     if(!(launched.moving) && (e.offsetY < h - 100)) {
         launched.moving = true;
-        // let debug = getCircleAt(e.offsetX, e.offsetY);
 
+        /**
+         * no way to get the position of the mouse without moving the mouse first. 
+         * So if click before first moving mouse, just launch directly upwards.
+         */
         if(!(movedMouse)) {
             launched.x = launcherX;
             launched.y = launcherY;

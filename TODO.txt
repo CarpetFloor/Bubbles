@@ -16,6 +16,7 @@
     5 circles with one circle is more points that removing 1 circle with one circle 
     five times)
 -When entire board is cleared game is won
+-Make circles look better
 -Fancy animations:
     >Launched circle impact (different than removing )
     >Remove circles animation
