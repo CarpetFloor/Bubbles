@@ -4,7 +4,7 @@ let w, h;
 
 let debugMode = false;
 let drawRowCols = true;
-let startWithBridge = true;
+let startWithBridge = false;
 let smallerBridge = false;
 let twoBridges = true;
 let islandEdge = true;
@@ -206,7 +206,8 @@ let launched = {
 
             addCircleAt(insertRow, this.previousCol, currentColor);
 
-            currentColor = randomColor();
+            currentColor = nextColor;
+            nextColor = randomColor();
         }
 
         this.previousRow = getRow(this.y);
@@ -236,8 +237,10 @@ let aimer = {
         }
 
         // main circle
-        drawCircle(x, y, 
-            currentColor, circleSize);
+        if(!(launched.moving)) {
+            drawCircle(x, y, 
+                currentColor, circleSize);
+        }
 
         x += firstMoveX;
         y += firstMoveY;
@@ -267,6 +270,7 @@ let colors = {
 }
 colors.current = colors.bright;
 let currentColor = randomColor();
+let nextColor = randomColor();
 
 function randomColor() {
     let max = colors.current.length;
@@ -1027,13 +1031,15 @@ function loop() {
 
     drawCircles();
 
+    // next color
+    drawCircle(
+        launcherX - (((circleSize * 2) + CIRCLES_SPACING) * 1.5), launcherY, 
+        nextColor, circleSize)
+
     if(launched.moving) {
         launched.update();
     }
-    // aiming
-    else {
-        aimer.draw();
-    }
+    aimer.draw();
 
     if(debugMode) {
         r.fillStyle = "black";
