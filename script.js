@@ -3,7 +3,7 @@ let r;
 let w, h;
 
 let debugMode = false;
-let drawRowCols = true;
+let drawRowCols = false;
 let startWithBridge = false;
 let smallerBridge = false;
 let twoBridges = true;
@@ -112,7 +112,7 @@ let movedMouse = false;
 // 90 degrees, start by aiming straight up (for aimer only)
 let mouseAngle = 1.5708;
 let mouseXpos = false;
-const LAUNCH_SPEED = 20;
+const LAUNCH_SPEED = 23;
 
 function findNextAvailInsert(row, col) {
     let insertRow = row;
@@ -259,9 +259,9 @@ let aimer = {
             x += moveX;
             y += moveY;
 
-            color = offsetHex(color, -30);
+            color = offsetHex(color, -25);
 
-            drawCircle(x, y, 
+            drawSimpleCircle(x, y, 
                 color, this.smallerSize);
         }
     }   
@@ -1045,15 +1045,63 @@ function launch(e) {
 
 let border = false;
 const BORDER_COLOR_DIFF = 40;
-const BORDER_SIZE = 2.5;
+// const BORDER_SIZE = 2.5;
+const BORDER_SIZE = 2;
 let borderStyle = 1;
+
+let stylized = true;
+
 function drawCircle(x, y, color, size) {
-    r.fillStyle = color;
-    r.beginPath();
-    r.arc(x, y, 
-        size, 
-        0, 2 * Math.PI); 
-    r.fill();
+    if(stylized) {
+        r.fillStyle = offsetHex(color, 0 - 50);
+        r.beginPath();
+        r.arc(x, y, 
+            size, 
+            0, 2 * Math.PI); 
+        r.fill();
+        
+        // main color
+        r.fillStyle = color;
+        r.beginPath();
+        r.arc(x - 4, y - 4, 
+            size * 0.7, 
+            0, 2 * Math.PI); 
+        r.fill();
+
+        // highlight
+        r.fillStyle = offsetHex(color, 0 + 50);
+        r.beginPath();
+        r.arc(x - 8, y - 8, 
+            size * 0.2, 
+            0, 2 * Math.PI); 
+        r.fill();
+    }
+    else {
+        // shadow
+        let shadowOffset = 2;
+        r.fillStyle = offsetHex(color, 0 - 50);
+        r.beginPath();
+        r.arc(x, y, 
+            size, 
+            0, 2 * Math.PI); 
+        r.fill();
+
+        // highlight
+        r.fillStyle = offsetHex(color, 0 + 50);
+        r.beginPath();
+        r.arc(x, y, 
+            size * 0.94, 
+            0, 2 * Math.PI); 
+        r.fill();
+        
+        // main color
+        r.fillStyle = color;
+        r.beginPath();
+        r.arc(x, y, 
+            size * 0.88, 
+            0, 2 * Math.PI); 
+        r.fill();
+    }
 
     if(border) {
         
@@ -1061,9 +1109,12 @@ function drawCircle(x, y, color, size) {
             r.strokeStyle = offsetHex(color, 0 - BORDER_COLOR_DIFF);
             r.lineWidth = BORDER_SIZE;
         }
-        else {
+        else if(borderStyle == 1) {
             r.strokeStyle = "Black"
-            r.lineWidth = 3;
+            r.lineWidth = 2;
+        }
+        else if(borderStyle == 2) {
+            r.strokeStyle = "White";
         }
 
         r.stroke();
@@ -1071,6 +1122,15 @@ function drawCircle(x, y, color, size) {
     }
 
     r.closePath();
+}
+
+function drawSimpleCircle(x, y, color, size) {
+    r.fillStyle = color;
+    r.beginPath();
+    r.arc(x, y, 
+        size, 
+        0, 2 * Math.PI); 
+    r.fill();
 }
 
 function drawNextColors() {
@@ -1095,7 +1155,7 @@ function drawLives() {
             color = "#ABB2B9";
         }
 
-        drawCircle(
+        drawSimpleCircle(
             x, launcherY, 
             color, circleSize);
         

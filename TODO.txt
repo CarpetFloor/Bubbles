@@ -9,7 +9,6 @@ TODO
 -Fix launched circle not getting placed correctly
 -Fix islands not getting cleared
 -Clean up code
--Make circles look better
 -Fancy animations:
     >Score update
     >Launched circle impact (different than removing )
