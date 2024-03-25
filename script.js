@@ -112,6 +112,7 @@ let movedMouse = false;
 // 90 degrees, start by aiming straight up (for aimer only)
 let mouseAngle = 1.5708;
 let mouseXpos = false;
+let mouseY = -1;
 const LAUNCH_SPEED = 23;
 
 function findNextAvailInsert(row, col) {
@@ -223,6 +224,11 @@ let launched = {
     }
 };
 
+let mouseLimitY = 125;
+let previousMoveX;
+let previousMoveY;
+let previousFirstMoveX;
+let previousFirstMoveY;
 let aimer = {
     smallerSize: -1, 
     spacing: 23, 
@@ -236,8 +242,14 @@ let aimer = {
 
         let moveX = Math.cos(mouseAngle) * this.spacing;
         let moveY = Math.sin(mouseAngle) * this.spacing;
-        
-        if(!(mouseXpos)) {
+
+        if(mouseY < mouseLimitY) {
+            firstMoveX = previousFirstMoveX;
+            firstMoveY = previousFirstMoveY;
+            moveX = previousMoveX;
+            moveY = previousMoveY;
+        }
+        else if(!(mouseXpos)) {
             firstMoveY *= -1;
             firstMoveX *= -1;
             moveY *= -1;
@@ -249,7 +261,7 @@ let aimer = {
             drawCircle(x, y, 
                 currentColor, circleSize);
         }
-
+            
         x += firstMoveX;
         y += firstMoveY;
 
@@ -263,6 +275,14 @@ let aimer = {
 
             drawSimpleCircle(x, y, 
                 color, this.smallerSize);
+        }
+
+        if(mouseY >= mouseLimitY) {
+            previousAimAngle = mouseAngle;
+            previousFirstMoveX = firstMoveX;
+            previousFirstMoveY = firstMoveY;
+            previousMoveX = moveX;
+            previousMoveY = moveY;
         }
     }   
 }
@@ -1002,6 +1022,8 @@ function setMouseAngle(e) {
     let xdiff = e.offsetX - launcherX;
     let ydiff = e.offsetY - launcherY;
 
+    mouseY = launcherY - e.offsetY;
+
     mouseXpos = xdiff > 0;
     
     mouseAngle = Math.atan(ydiff / xdiff);
@@ -1009,7 +1031,7 @@ function setMouseAngle(e) {
 
 function launch(e) {
     // don't allow launching ball to horizontal to prevent bouncing back and forth horizontally
-    if(!(launched.moving) && (e.offsetY < h - 100)) {
+    if(!(launched.moving) && (mouseY >= mouseLimitY)) {
         launched.moving = true;
 
         /**
@@ -1050,9 +1072,21 @@ const BORDER_SIZE = 2;
 let borderStyle = 1;
 
 let stylized = true;
+let stylizedShadow = false;
 
 function drawCircle(x, y, color, size) {
     if(stylized) {
+        // shadow shadow
+        if(stylizedShadow) {
+            r.fillStyle = "#1C2833";
+            r.beginPath();
+            r.arc(x + 1, y + 1, 
+                size, 
+                0, 2 * Math.PI); 
+            r.fill();
+        }
+
+        // shadow
         r.fillStyle = offsetHex(color, 0 - 50);
         r.beginPath();
         r.arc(x, y, 
