@@ -415,7 +415,7 @@ function addCircleAt(row, col, color) {
     
     circles[row][col] = color;
 
-    // checkForDeletes(row, col, color);
+    checkForDeletes(row, col, color);
 }
 
 // getAdjacents and getIslandAdjacents have extremely redundant code, so at some point fix
@@ -877,6 +877,70 @@ function checkForDeletes(row, col, color) {
     }
     else {
         console.log("don't need to check for islands");
+    }
+
+    // for some reasons islands with a length of 1 don't get removed
+    for(let row = 0; row < circles.length; row++) {
+        for(let col = 0; col < circles[row].length; col++) {
+            let leftEmpty = false;
+            if((col > 0) && (circles[row][col - 1] == -1)) {
+                leftEmpty = true;
+            }
+
+            let rightEmpty = false;
+            if((col < circles[row].length - 1) && (circles[row][col + 1] == -1)) {
+                rightEmpty = true;
+            }
+
+            let upEmpty = false;
+            if((row > 0) && (circles[row - 1][col] == -1)) {
+                upEmpty = true;
+            }
+
+            let downEmpty = false;
+            if((row < circles.length - 1) && (circles[row + 1][col] == -1)) {
+                downEmpty = true;
+            }
+
+            if(leftEmpty && rightEmpty && upEmpty && downEmpty) {
+                if(row % 2 == 1) {
+                    let topRightEmpty = false;
+                    if((row > 0) && (col < circles[row].length - 1) &&
+                    upEmpty && rightEmpty) {
+                        topRightEmpty = true;
+                    }
+
+                    let bottomRightEmpty = false;
+                    if((row < circles.length - 1) && (col < circles[row].length - 1) && 
+                    downEmpty && rightEmpty) {
+                        bottomRightEmpty = true;
+                    }
+
+                    if(topRightEmpty && bottomRightEmpty) {
+                        console.log("FOUND A SINGLE ISLAND AT", row, col);
+                        circles[row][col] = -1;
+                    }
+                }
+                else {
+                    let topLeftEmpty = false;
+                    if((row > 0) && (col > 0) &&
+                    upEmpty && leftEmpty) {
+                        topLeftEmpty = true;
+                    }
+
+                    let bottomLeftEmpty = false;
+                    if((row < circles.length - 1) && (col > 0) && 
+                    downEmpty && leftEmpty) {
+                        bottomLeftEmpty = true;
+                    }
+
+                    if(topLeftEmpty && bottomLeftEmpty) {
+                        console.log("FOUND A SINGLE ISLAND AT", row, col);
+                        circles[row][col] = -1;
+                    }
+                }
+            }
+        }
     }
 }
 
