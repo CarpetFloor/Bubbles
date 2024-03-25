@@ -240,7 +240,7 @@ let aimer = {
         // main circle
         if(!(launched.moving)) {
             drawCircle(x, y, 
-                currentColor, circleSize);
+                currentColor, circleSize * 1.25);
         }
 
         x += firstMoveX;
@@ -1038,6 +1038,24 @@ function drawNextColors() {
         nextNextColor, circleSize);
 }
 
+let lives = 5;
+function drawLives() {
+    let x = launcherX - (space * 4.25);
+
+    for(let i = 0; i < 5; i++) {
+        let color = "#212F3D";
+        if(5 - i <= lives) {
+            color = "#ABB2B9";
+        }
+
+        drawCircle(
+            x, launcherY, 
+            color, circleSize);
+        
+        x -= space;
+    }
+}
+
 function loop() {
     let frameStart = Date.now();
 
@@ -1045,8 +1063,9 @@ function loop() {
 
     drawCircles();
 
-    // next color
     drawNextColors();
+
+    drawLives();
 
     if(launched.moving) {
         launched.update();

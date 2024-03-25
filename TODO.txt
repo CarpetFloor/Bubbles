@@ -10,7 +10,6 @@ TODO
     >Causing any number of circles to get removed does not remove a "life"
     >When a circle is placed that does not remove any circles, a "life" is removed
     >If "lifes" gets to 0, then move all circles down and reset "lifes"
-    >Also show what the next 2 colors will be
 -Place launcher below where the last row of game is (aimer can go above thought)
 -Lose game if a circle reaches bottom
 -Score, with more points better with more circles removed (meaning that removing 
