@@ -6,10 +6,8 @@ BUGS
 -Sometimes islands are not removed
 
 TODO
--When entire board is cleared game is won
--Game over screen:
-    >Shows whether or not user won or lost
-    >Shows user score
+-Fix launched circle not getting placed correctly
+-Fix islands not getting cleared
 -Clean up code
 -Make circles look better
 -Fancy animations:
