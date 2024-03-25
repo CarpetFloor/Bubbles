@@ -1,3 +1,5 @@
+-Sometimes launched circle will go through a circle
+
 -After circles are removed, also remove any isolated groups of circles
 -Circles moving down system:
     >Start with 6 "lives"
