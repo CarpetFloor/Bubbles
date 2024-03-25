@@ -110,7 +110,7 @@ let movedMouse = false;
 // 90 degrees, start by aiming straight up (for aimer only)
 let mouseAngle = 1.5708;
 let mouseXpos = false;
-const LAUNCH_SPEED = 22;
+const LAUNCH_SPEED = 20;
 
 function findNextAvailInsert(row, col) {
     let insertRow = row;
@@ -165,6 +165,8 @@ let launched = {
     moveX: -1, 
     moveY: -1, 
     moving: false, 
+    previousRow: -1, 
+    previousCol: -1, 
     update: function() {
         this.x += this.moveX;
         this.y += this.moveY;
@@ -177,7 +179,7 @@ let launched = {
         drawCircle(this.x, this.y, 
             currentColor, circleSize);
         
-        let collisionCheck = getCircleAt(this.x, this.y - space);
+        let collisionCheck = getCircleAt(this.x, this.y);
 
         if(debugMode) {
             console.log(collisionCheck)
@@ -186,15 +188,29 @@ let launched = {
         this.moving = (collisionCheck == -1);
 
         if(!(this.moving)) {
+            console.log("collided with ", collisionCheck[0], collisionCheck[1]);
+            console.log("previous", this.previousRow, this.previousCol);
             if(drawRowCols) {
                 console.log("collided with ", collisionCheck[0], collisionCheck[1]);
             }
 
-            let insertAt = findNextAvailInsert(collisionCheck[0], collisionCheck[1]);
-            addCircleAt(insertAt[0], insertAt[1], currentColor);
+            // let insertAt = findNextAvailInsert(collisionCheck[0], collisionCheck[1]);
+            // addCircleAt(insertAt[0], insertAt[1], currentColor);
+
+            let insertRow = this.previousRow;
+            if(insertRow < circles.length + 1) {
+                if(circles[insertRow - 1][this.previousCol] == -1) {
+                    --insertRow;
+                }
+            }
+
+            addCircleAt(insertRow, this.previousCol, currentColor);
 
             currentColor = randomColor();
         }
+
+        this.previousRow = getRow(this.y);
+        this.previousCol = getCol(this.previousRow, this.x);
     }
 };
 
@@ -360,6 +376,32 @@ function getCircleAt(x, y) {
     return [row, col];
 }
 
+function getRow(y) {
+    let row = Math.floor(y / space);
+    if(row < 0) {
+        row = 0;
+    }
+
+    return row;
+}
+
+function getCol(row, x) {
+    let xOffset = 0;
+    if((row % 2 == 0) && (shiftOddRows)) {
+        xOffset = space / 2;
+    }
+
+    let col = Math.floor((x - xOffset) / space);
+    if(col < 0) {
+        col = 0;
+    }
+    if(col > CIRCLES_MAX_COUNT_HORIZONTAL - 1) {
+        col = CIRCLES_MAX_COUNT_HORIZONTAL - 1;
+    }
+
+    return col;
+}
+
 function addCircleAt(row, col, color) {
     if(row > circles.length - 1) {
         let addedRow = [];
@@ -373,7 +415,7 @@ function addCircleAt(row, col, color) {
     
     circles[row][col] = color;
 
-    checkForDeletes(row, col, color);
+    // checkForDeletes(row, col, color);
 }
 
 // getAdjacents and getIslandAdjacents have extremely redundant code, so at some point fix
