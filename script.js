@@ -695,6 +695,30 @@ function getNonEmptyCount() {
     return count;
 }
 
+function resetLives() {
+    lives = 5;
+
+    // add new row
+    let row = [];
+    for(let col = 0; col < circles[0].length; col++) {
+        row.push(-1);
+    }
+    
+    circles.push(row);
+
+    // move everything down
+    for(let row = circles.length - 1; row > 1; row--) {
+        for(let col = 0; col < circles[row].length; col++) {
+            circles[row][col] = circles[row - 1][col];
+        }
+    }
+
+    // "add" new row by replacing top row with random stuf
+    for(let col = 0; col < circles[0].length; col++) {
+        circles[0][col] = randomColor();
+    }
+}
+
 let alreadyFound = "";
 function checkForDeletes(row, col, color) {
     console.log("|-|.|-|.|-|.|-|.|-|.|-|.|-|.|-|.|-|.|-|");
@@ -750,6 +774,13 @@ function checkForDeletes(row, col, color) {
             }
 
             circles[row][col] = -1;
+        }
+    }
+    else {
+        --lives;
+
+        if(lives == 0) {
+            resetLives();
         }
     }
 
