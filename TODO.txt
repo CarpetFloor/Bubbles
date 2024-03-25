@@ -1,23 +1,21 @@
 BUGS
+-There seems to be an issue with checking for islands only in bounds
 -Sometimes launched circle will go through a circle
 -Sometimes launched circle will end up in the wrong spot
 -Left and right edge islands are never removed
 -Sometimes islands are not removed
 
 TODO
--Circles moving down system:
-    >Start with 6 "lives"
-    >Causing any number of circles to get removed does not remove a "life"
-    >When a circle is placed that does not remove any circles, a "life" is removed
-    >If "lifes" gets to 0, then move all circles down and reset "lifes"
 -Place launcher below where the last row of game is (aimer can go above thought)
 -Lose game if a circle reaches bottom
--Score, with more points better with more circles removed (meaning that removing 
-    5 circles with one circle is more points that removing 1 circle with one circle 
-    five times)
 -When entire board is cleared game is won
+-Game over screen:
+    >Shows whether or not user won or lost
+    >Shows user score
+-Clean up code
 -Make circles look better
 -Fancy animations:
+    >Score update
     >Launched circle impact (different than removing )
     >Remove circles animation
     >Move circles down animation

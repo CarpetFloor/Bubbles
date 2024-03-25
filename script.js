@@ -7,7 +7,7 @@ let drawRowCols = true;
 let startWithBridge = false;
 let smallerBridge = false;
 let twoBridges = true;
-let islandEdge = true;
+let islandEdge = false;
 
 let shiftOddRows = true;
 const CIRCLES_MAX_COUNT_HORIZONTAL = 18;
@@ -204,7 +204,12 @@ let launched = {
                 }
             }
 
+            nonEmptyBefore = getNonEmptyCount();
+            
             addCircleAt(insertRow, this.previousCol, currentColor);
+
+            nonEmptyAfter = getNonEmptyCount();
+            updateScore();
 
             currentColor = nextColor;
             nextColor = nextNextColor;
@@ -240,7 +245,7 @@ let aimer = {
         // main circle
         if(!(launched.moving)) {
             drawCircle(x, y, 
-                currentColor, circleSize * 1.25);
+                currentColor, circleSize);
         }
 
         x += firstMoveX;
@@ -678,16 +683,12 @@ function getIslandAdjacents(row, col) {
 
 let empties = [];
 function getNonEmptyCount() {
-    empties = [];
     let count = 0;
 
     for(let row = 0; row < circles.length; row++) {
         for(let col = 0; col < circles[row].length; col++) {
             if(circles[row][col] != -1) {
                 ++count;
-            }
-            else {
-                empties.push(row + ", " + col);
             }
         }
     }
@@ -719,6 +720,19 @@ function resetLives() {
     }
 }
 
+function updateScore() {
+    let removed = nonEmptyBefore - nonEmptyAfter;
+
+    let multiply = 0;
+    for(let i = 0; i < removed; i++) {
+        multiply += 2;
+    }
+
+    score += removed * multiply;
+}
+
+let nonEmptyBefore = -1;
+let nonEmptyAfter = -1;
 let alreadyFound = "";
 function checkForDeletes(row, col, color) {
     console.log("|-|.|-|.|-|.|-|.|-|.|-|.|-|.|-|.|-|.|-|");
@@ -1087,6 +1101,23 @@ function drawLives() {
     }
 }
 
+let score = 0;
+function drawScore() {
+    let scoreString = score.toString();
+    let text = "";
+    for(let i = scoreString.length - 1; i >= 0; i--) {
+        text += scoreString[scoreString.length - 1 - i];
+        if((i % 3 == 0) && (i != 0)) {
+            text += ",";
+        }
+    }
+    let x = launcherX + (space * 1.5);
+    r.font = "35px Tauri";
+    r.fillStyle = "white";
+
+    r.fillText(text, x, launcherY + 10);
+}
+
 function loop() {
     let frameStart = Date.now();
 
@@ -1097,6 +1128,8 @@ function loop() {
     drawNextColors();
 
     drawLives();
+
+    drawScore();
 
     if(launched.moving) {
         launched.update();
