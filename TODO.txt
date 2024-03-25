@@ -1,8 +1,3 @@
--Circles on the left side have a tendency to get placed on the right
--Cannot place circle in between two other circles
--When circle lands to the right of where aiming at, and keep firing aiming at the same spot will 
-    keep going in the same spot and replacing the circle that is already there
--Fix circles not getting placed on the correct spot
 -After circles are removed, also remove any isolated groups of circles
 -Circles moving down system:
     >Start with 6 "lives"

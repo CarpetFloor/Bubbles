@@ -30,6 +30,13 @@ window.onload = () => {
     
     initCircles();
     
+    circles[8][7] = currentColor;
+    circles[7][6] = currentColor;
+    circles[6][6] = currentColor;
+    circles[6][5] = currentColor;
+    circles[7][4] = currentColor;
+    circles[8][5] = currentColor;
+
     c.addEventListener("mousemove", setMouseAngle);
     c.addEventListener("click", launch);
     window.setInterval(loop, 1000 / 60);
@@ -325,7 +332,7 @@ function addCircleAt(row, col, color) {
     
     circles[row][col] = color;
 
-    // checkForDeletes(row, col, color);
+    checkForDeletes(row, col, color);
 }
 
 function getAdjacents(row, col, color) {
@@ -340,13 +347,13 @@ function getAdjacents(row, col, color) {
     // left
     if(col > 0){
         notFarthestLeft = true;
-        let sameColor = (circles[row + 0][col - 1] == color);
+        let sameColor = (circles[row + 0][col - 1] == color);    
         if(sameColor && !(already.includes((row + 0) + ", " + (col - 1)))) {
             alreadyFound += (row + 0) + ", " + (col - 1) + ".";
             notFarthestLeft = true;
             adjacents += (row + 0) + ", " + (col - 1) + "."
             
-            if(circles[row + 0][col - 1] == color) {
+            if(circles[row + 0][col - 1] == color) {            
                 adjacents += getAdjacents(row + 0, col - 1, color);
             }
         }
@@ -354,13 +361,13 @@ function getAdjacents(row, col, color) {
     // right
     if(col < circles[0].length - 1){
         notFarthestRight = true;
-        let sameColor = (circles[row + 0][col + 1] == color);
+        let sameColor = (circles[row + 0][col + 1] == color);    
         if(sameColor && !(already.includes((row + 0) + ", " + (col + 1)))) {
             alreadyFound += (row + 0) + ", " + (col + 1) + ".";
             notFarthestRight = true;
             adjacents += (row + 0) + ", " + (col + 1) + "."
             
-            if(circles[row + 0][col + 1] == color) {
+            if(circles[row + 0][col + 1] == color) {            
                 adjacents += getAdjacents(row + 0, col + 1, color);
             }
         }
@@ -368,27 +375,27 @@ function getAdjacents(row, col, color) {
     // up
     if(row > 0){
         notFarthestUp = true;
-        let sameColor = (circles[row - 1][col + 0] == color);
+        let sameColor = (circles[row - 1][col + 0] == color);    
         if(sameColor && !(already.includes((row - 1) + ", " + (col + 0)))) {
             alreadyFound += (row - 1) + ", " + (col + 0) + ".";
             notFarthestUp = true;
             adjacents += (row - 1) + ", " + (col + 0) + "."
             
-            if(circles[row - 1][col + 0] == color) {
+            if(circles[row - 1][col + 0] == color) {            
                 adjacents += getAdjacents(row - 1, col + 0, color);
             }
         }
     }
     // down
-    if(row < colors.length - 1){
+    if(row < circles.length - 1){
         notFarthestDown = true;
-        let sameColor = (circles[row + 1][col + 0] == color);
+        let sameColor = (circles[row + 1][col + 0] == color);    
         if(sameColor && !(already.includes((row + 1) + ", " + (col + 0)))) {
             alreadyFound += (row + 1) + ", " + (col + 0) + ".";
             notFarthestDown = true;
             adjacents += (row + 1) + ", " + (col + 0) + "."
             
-            if(circles[row + 1][col + 0] == color) {
+            if(circles[row + 1][col + 0] == color) {            
                 adjacents += getAdjacents(row + 1, col + 0, color);
             }
         }
@@ -398,12 +405,12 @@ function getAdjacents(row, col, color) {
 
     // top-left
     if(notFarthestUp && notFarthestLeft && (row % 2 == 0)) {
-        let sameColor = (circles[row - 1][col - 1] == color);
+        let sameColor = (circles[row - 1][col - 1] == color);    
         if(sameColor && !(already.includes((row - 1) + ", " + (col - 1)))) {
             alreadyFound += (row - 1) + ", " + (col - 1) + ".";
             adjacents += (row - 1) + ", " + (col - 1) + "."
             
-            if(circles[row - 1][col - 1] == color) {
+            if(circles[row - 1][col - 1] == color) {            
                 adjacents += getAdjacents(row - 1, col - 1, color);
             }
         }
@@ -411,12 +418,12 @@ function getAdjacents(row, col, color) {
 
     // top-right
     if(notFarthestUp && notFarthestRight && (row % 2 == 1)) {
-        let sameColor = (circles[row - 1][col + 1] == color);
+        let sameColor = (circles[row - 1][col + 1] == color);    
         if(sameColor && !(already.includes((row - 1) + ", " + (col + 1)))) {
             alreadyFound += (row - 1) + ", " + (col + 1) + ".";
             adjacents += (row - 1) + ", " + (col + 1) + "."
             
-            if(circles[row - 1][col + 1] == color) {
+            if(circles[row - 1][col + 1] == color) {            
                 adjacents += getAdjacents(row - 1, col + 1, color);
             }
         }
@@ -424,12 +431,12 @@ function getAdjacents(row, col, color) {
 
     // bottom-left
     if(notFarthestDown && notFarthestLeft && (row % 2 == 0)) {
-        let sameColor = (circles[row + 1][col - 1] == color);
+        let sameColor = (circles[row + 1][col - 1] == color);    
         if(sameColor && !(already.includes((row + 1) + ", " + (col - 1)))) {
             alreadyFound += (row + 1) + ", " + (col - 1) + ".";
             adjacents += (row + 1) + ", " + (col - 1) + "."
             
-            if(circles[row + 1][col - 1] == color) {
+            if(circles[row + 1][col - 1] == color) {            
                 adjacents += getAdjacents(row + 1, col - 1, color);
             }
         }
@@ -437,12 +444,12 @@ function getAdjacents(row, col, color) {
 
     // bottom-right
     if(notFarthestDown && notFarthestRight && (row % 2 == 1)) {
-        let sameColor = (circles[row + 1][col + 1] == color);
+        let sameColor = (circles[row + 1][col + 1] == color);    
         if(sameColor && !(already.includes((row + 1) + ", " + (col + 1)))) {
             alreadyFound += (row + 1) + ", " + (col + 1) + ".";
             adjacents += (row + 1) + ", " + (col + 1) + "."
             
-            if(circles[row + 1][col + 1] == color) {
+            if(circles[row + 1][col + 1] == color) {            
                 adjacents += getAdjacents(row + 1, col + 1, color);
             }
         }
@@ -454,7 +461,7 @@ function getAdjacents(row, col, color) {
 
 let alreadyFound = [];
 function checkForDeletes(row, col, color) {
-    alreadyFound = "";
+    alreadyFound = row + ", " + col + ".";
     
     let adjacents = getAdjacents(row, col, color);
     let adjacentArray = adjacents.split(".");
@@ -471,19 +478,18 @@ function checkForDeletes(row, col, color) {
     }
 
     if(drawRowCols) {
-        console.log("", adjacentArray);
+        console.log(removeDuplicates);
     }
 
-    adjacentArray = removeDuplicates;
-    if(adjacentArray.length > 1) {
-        circles[row][col] = -1;
+    if(removeDuplicates.length > 1) {
+        // circles[row][col] = -1;
 
-        for(let circle of adjacentArray) {
+        for(let circle of removeDuplicates) {
             let split = circle.split(", ");
             let row = parseInt(split[0]);
             let col = parseInt(split[1]);
 
-            circles[row][col] = -1;
+            // circles[row][col] = -1;
         }
     }
 }
