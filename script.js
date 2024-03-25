@@ -1137,10 +1137,19 @@ function drawScore() {
     r.fillText(text, x, launcherY + yOffset);
 }
 
+function drawBottomBorder() {
+    let y = CIRCLES_SPACING;
+    y += space * 15;
+    r.fillStyle = "#85929E";
+    r.fillRect(0, y, w, 1);
+}
+
 function loop() {
     let frameStart = Date.now();
 
     r.clearRect(0, 0, w, h);
+
+    drawBottomBorder();
 
     drawCircles();
 
