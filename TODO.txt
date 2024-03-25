@@ -6,8 +6,6 @@ BUGS
 -Sometimes islands are not removed
 
 TODO
--Place launcher below where the last row of game is (aimer can go above thought)
--Lose game if a circle reaches bottom
 -When entire board is cleared game is won
 -Game over screen:
     >Shows whether or not user won or lost

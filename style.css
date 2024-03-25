@@ -15,3 +15,55 @@ canvas {
     left: 50%;
     transform: translate(-50%, -50%);
 }
+
+#menu {
+    background-color: #D6DBDF;
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50px;
+    box-shadow: 4px 4px #1C2833;
+    display: none;
+}
+
+#menu p, #menu button {
+    padding: 0;
+    margin: 0;
+}
+
+#menu p, #menu button {
+    font-family: "Tauri";
+    color: #17202A;
+    font-size: 40px;
+    margin-bottom: 20px;
+}
+
+#menu #message {
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+#menu button {
+    margin-top: 15px;
+    background-color: #82E0AA;
+    border: none;
+    padding: 15px;
+    border-radius: 25px;
+    box-shadow: 1px 1px 2px 2px #48C9B0;
+    transition: 0.15s all;
+}
+#menu button:hover {
+    cursor: pointer;
+    background-color: #2ECC71;
+    padding-left: 25px;
+    padding-right: 25px;
+    box-shadow: 1px 1px 2px 2px #1ABC9C;
+    font-weight: bold;
+}

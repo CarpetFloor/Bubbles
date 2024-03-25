@@ -16,6 +16,8 @@ const CIRCLES_SPACING = 3;
 let circleSize = -1;
 let space;
 
+let gameInterval;
+
 window.onload = () => {
     c = document.querySelector("canvas");
     r = c.getContext("2d");
@@ -80,7 +82,7 @@ window.onload = () => {
 
     c.addEventListener("mousemove", setMouseAngle);
     c.addEventListener("click", launch);
-    window.setInterval(loop, 1000 / 60);
+    gameInterval = window.setInterval(loop, 1000 / 60);
 }
 
 function offsetHex(hex, offset) {
@@ -1183,5 +1185,30 @@ function loop() {
         );
     }
 
+    checkForGameOver();
+
     let frameEnd = Date.now();
+}
+
+function checkForGameOver() {
+    let over = false;
+    let message = "you ";
+
+    if(circles.length > 15) {
+        over = true;
+        message += "lost"
+    }
+    
+    let count = getNonEmptyCount();
+    if(count == 0) {
+        over = true;
+        message += "won";
+    }
+
+    if(over) {
+        window.clearInterval(gameInterval);
+        document.getElementById("message").innerText = message;
+        document.getElementById("score").innerText = score + " pts";
+        document.getElementById("menu").style.display = "flex";
+    }
 }
