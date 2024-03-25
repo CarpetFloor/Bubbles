@@ -1111,11 +1111,30 @@ function drawScore() {
             text += ",";
         }
     }
-    let x = launcherX + (space * 1.5);
-    r.font = "35px Tauri";
-    r.fillStyle = "white";
+    let x = launcherX + (space * 1.8);
 
-    r.fillText(text, x, launcherY + 10);
+    let yOffset = 9;
+
+    r.beginPath();
+    r.fillStyle = "#566573";
+    let width = 350;
+    let height = 100;
+    r.roundRect(x - 18, launcherY - yOffset - (height * 0.38), width, height, 20);
+    r.fill();
+    r.closePath();
+
+    r.beginPath();
+    r.fillStyle = "#1C2833";
+    width = 350;
+    height = 100;
+    r.roundRect(x - 15, launcherY - yOffset - (height * 0.35), width, height, 20);
+    r.fill();
+    r.closePath();
+
+    r.font = "45px Tauri";
+    r.fillStyle = "#F7DC6F";
+
+    r.fillText(text, x, launcherY + yOffset);
 }
 
 function loop() {
