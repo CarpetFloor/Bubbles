@@ -207,7 +207,8 @@ let launched = {
             addCircleAt(insertRow, this.previousCol, currentColor);
 
             currentColor = nextColor;
-            nextColor = randomColor();
+            nextColor = nextNextColor;
+            nextNextColor = randomColor();
         }
 
         this.previousRow = getRow(this.y);
@@ -271,6 +272,7 @@ let colors = {
 colors.current = colors.bright;
 let currentColor = randomColor();
 let nextColor = randomColor();
+let nextNextColor = randomColor();
 
 function randomColor() {
     let max = colors.current.length;
@@ -1024,6 +1026,18 @@ function drawCircle(x, y, color, size) {
     r.closePath();
 }
 
+function drawNextColors() {
+    let x = launcherX - (space * 1.5);
+    drawCircle(
+        x, launcherY, 
+        nextColor, circleSize);
+    
+    x -= space * 1.15;
+    drawCircle(
+        x, launcherY, 
+        nextNextColor, circleSize);
+}
+
 function loop() {
     let frameStart = Date.now();
 
@@ -1032,9 +1046,7 @@ function loop() {
     drawCircles();
 
     // next color
-    drawCircle(
-        launcherX - (((circleSize * 2) + CIRCLES_SPACING) * 1.5), launcherY, 
-        nextColor, circleSize)
+    drawNextColors();
 
     if(launched.moving) {
         launched.update();
