@@ -1,6 +1,10 @@
+BUGS
 -Sometimes launched circle will go through a circle
+-Sometimes launched circle will end up in the wrong spot
+-Left and right edge islands are never removed
+-Sometimes islands are not removed
 
--After circles are removed, also remove any isolated groups of circles
+TODO
 -Circles moving down system:
     >Start with 6 "lives"
     >Causing any number of circles to get removed does not remove a "life"

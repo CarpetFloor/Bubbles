@@ -6,6 +6,8 @@ let debugMode = false;
 let drawRowCols = true;
 let startWithBridge = true;
 let smallerBridge = false;
+let twoBridges = true;
+let islandEdge = true;
 
 let shiftOddRows = true;
 const CIRCLES_MAX_COUNT_HORIZONTAL = 18;
@@ -40,6 +42,14 @@ window.onload = () => {
             circles[7][5] = currentColor;
             circles[7][4] = currentColor;
             circles[8][5] = currentColor;
+
+            if(twoBridges) {
+                circles[8][7 + 10] = currentColor;
+                circles[7][6 + 10] = currentColor;
+                circles[7][5 + 10] = currentColor;
+                circles[7][4 + 10] = currentColor;
+                circles[8][5 + 10] = currentColor;
+            }
         }
         else {
             circles[8][7] = currentColor;
@@ -48,7 +58,24 @@ window.onload = () => {
             circles[6][5] = currentColor;
             circles[7][4] = currentColor;
             circles[8][5] = currentColor;
+
+            if(twoBridges) {
+                circles[8][7 + 10] = currentColor;
+                circles[7][6 + 10] = currentColor;
+                circles[6][6 + 10] = currentColor;
+                circles[6][5 + 10] = currentColor;
+                circles[7][4 + 10] = currentColor;
+                circles[8][5 + 10] = currentColor;
+            }
         }
+    }
+    if(islandEdge) {
+        circles[8][17] = currentColor;
+        circles[7][16] = currentColor;
+        circles[6][16] = currentColor;
+        circles[5][16] = currentColor;
+        circles[4][17] = currentColor;
+        circles[6][17] = currentColor;
     }
 
     c.addEventListener("mousemove", setMouseAngle);
@@ -478,6 +505,7 @@ function getAdjacents(row, col, color) {
 function getIslandAdjacents(row, col) {
     let already = alreadyFound.split(".");
     let adjacents = "";
+    if(row > -1 && col > -1) {
 
     let notFarthestLeft = false;
     let notFarthestRight = false;
@@ -500,7 +528,6 @@ function getIslandAdjacents(row, col) {
     }
     // right
     if(col < circles[0].length - 1){
-        notFarthestRight = true;
         let notEmpty = (circles[row + 0][col + 1] != -1);    
         if(notEmpty && !(already.includes((row + 0) + ", " + (col + 1)))) {
             alreadyFound += (row + 0) + ", " + (col + 1) + ".";
@@ -595,6 +622,8 @@ function getIslandAdjacents(row, col) {
         }
     }
 
+    }
+
     
     return adjacents;
 }
@@ -620,13 +649,18 @@ function getNonEmptyCount() {
 
 let alreadyFound = "";
 function checkForDeletes(row, col, color) {
+    console.log("|-|.|-|.|-|.|-|.|-|.|-|.|-|.|-|.|-|.|-|");
     alreadyFound = row + ", " + col + ".";
     
     let adjacents = getAdjacents(row, col, color);
     let adjacentArray = adjacents.split(".");
     
     // last elem is the empty string
-    --adjacentArray.length;
+    let remove = adjacentArray.includes("");
+    while(remove) {
+        --adjacentArray.length;
+        remove = adjacentArray.includes("");
+    }
     
     // for some reason duplicates sometimes show up, so remove duplicates
     let removeDuplicates = [];
@@ -677,6 +711,8 @@ function checkForDeletes(row, col, color) {
         let checkForIslands = true;
         alreadyFound = "";
 
+        let iterations = 0;
+
         while(checkForIslands) {
             let alreadyCheck = alreadyFound.split(".");
             /**
@@ -716,8 +752,18 @@ function checkForDeletes(row, col, color) {
 
             console.log(islandAdjacentSet);
             console.log(empties);
+
+            console.log("BEFORE", islandAdjacentSet.size);
+            if(startRow != -1) {
+                let remove = islandAdjacentSet.has("");
+                while(remove) {
+                    islandAdjacentSet.delete("");
+                    remove = islandAdjacentSet.has("");
+                }
+            }
+            console.log("AFTER", islandAdjacentSet.size)
             
-            if((islandAdjacentSet.size - 1) < nonEmptyCount) {
+            if((islandAdjacentSet.size < nonEmptyCount) && (startRow != -1)) {
                 console.log("there is an island, checking if found island in bounds.");
                 let inBounds = true;
 
@@ -744,28 +790,31 @@ function checkForDeletes(row, col, color) {
                 });
 
                 if(inBounds) {
-                    checkForIslands = false;
                     console.log("found island IN bounds");
 
                     // console.log("THE ALREADY:");
                     // let test = new Set(alreadyFound.split("."));
                     // console.log(test);
 
-                    window.setTimeout(function(){
-                        islandAdjacentSet.forEach(function(circle) {
-                            if(circle.length > 0) {
-                            let circleSplit = circle.split(", ");
+                    // window.setTimeout(function(){
+                    islandAdjacentSet.forEach(function(circle) {
+                        if(circle.length > 0) {
+                        let circleSplit = circle.split(", ");
 
-                            let circleRow = circleSplit[0];
-                            let circleCol = circleSplit[1];
+                        let circleRow = circleSplit[0];
+                        let circleCol = circleSplit[1];
 
-                            console.log("removing island", circleRow, circleCol);
-                            circles[circleRow][circleCol] = -1;
-                            }
-                        });
-                    }, 1000);
+                        console.log("removing island", circleRow, circleCol);
+                        circles[circleRow][circleCol] = -1;
+                        }
+                    });
+                    // }, 500);
+
+                    nonEmptyCount = getNonEmptyCount();
+                    checkForIslands = ((islandAdjacentSet.size - 1) < nonEmptyCount);
                 }
                 else {
+                    checkForIslands = true;
                     console.log("found island NOT in bounds");
                 }
             }
@@ -776,6 +825,12 @@ function checkForDeletes(row, col, color) {
 
             console.log("check again?", checkForIslands);
             console.log("--------------------");
+
+            ++iterations;
+            if(iterations > 20) {
+                console.log("!!!!!INFINITE LOOP DETECTED!!!!!");
+                checkForIslands = false;
+            }
         }
     }
     else {
