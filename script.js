@@ -3,8 +3,8 @@ let r;
 let w, h;
 
 let debugMode = false;
-let drawRowCols = false;
-let startWithBridge = false;
+let drawRowCols = true;
+let startWithBridge = true;
 let smallerBridge = false;
 let twoBridges = true;
 let islandEdge = false;
@@ -222,6 +222,9 @@ let launched = {
         this.previousCol = getCol(this.previousRow, this.x);
     }, 
     finishedLaunch: function() {
+        checkForIslands();
+    }, 
+    finishedIslandCheck: function() {
         effectsFinished = true;
         nonEmptyAfter = getNonEmptyCount();
         updateScore();
@@ -548,7 +551,7 @@ function getAdjacents(row, col, color) {
 function getIslandAdjacents(row, col) {
     let already = alreadyFound.split(".");
     let adjacents = "";
-    if(row > -1 && col > -1) {
+    if(((row > -1) && (col > -1)) && (islandCheckCirclesCopy[row][col] != -1)) {
 
     let notFarthestLeft = false;
     let notFarthestRight = false;
@@ -558,26 +561,28 @@ function getIslandAdjacents(row, col) {
     // left
     if(col > 0){
         notFarthestLeft = true;
-        let notEmpty = (circles[row + 0][col - 1] != -1);    
+        let notEmpty = (islandCheckCirclesCopy[row + 0][col - 1] != -1);    
         if(notEmpty && !(already.includes((row + 0) + ", " + (col - 1)))) {
             alreadyFound += (row + 0) + ", " + (col - 1) + ".";
             notFarthestLeft = true;
-            adjacents += (row + 0) + ", " + (col - 1) + "."
+            adjacents += (row + 0) + ", " + (col - 1) + ".";
+            // console.log("FOUND",  ((row + 0) + ", " + (col - 1)), "FROM", row, col);
             
-            if(circles[row + 0][col - 1] != -1) {            
+            if(islandCheckCirclesCopy[row + 0][col - 1] != -1) {            
                 adjacents += getIslandAdjacents(row + 0, col - 1);
             }
         }
     }
     // right
-    if(col < circles[0].length - 1){
-        let notEmpty = (circles[row + 0][col + 1] != -1);    
+    if(col < islandCheckCirclesCopy[0].length - 1){
+        let notEmpty = (islandCheckCirclesCopy[row + 0][col + 1] != -1);    
         if(notEmpty && !(already.includes((row + 0) + ", " + (col + 1)))) {
             alreadyFound += (row + 0) + ", " + (col + 1) + ".";
             notFarthestRight = true;
-            adjacents += (row + 0) + ", " + (col + 1) + "."
+            adjacents += (row + 0) + ", " + (col + 1) + ".";
+            // console.log("FOUND",  ((row + 0) + ", " + (col + 1)), "FROM", row, col);
             
-            if(circles[row + 0][col + 1] != -1) {            
+            if(islandCheckCirclesCopy[row + 0][col + 1] != -1) {            
                 adjacents += getIslandAdjacents(row + 0, col + 1);
             }
         }
@@ -585,27 +590,29 @@ function getIslandAdjacents(row, col) {
     // up
     if(row > 0){
         notFarthestUp = true;
-        let notEmpty = (circles[row - 1][col + 0] != -1);    
+        let notEmpty = (islandCheckCirclesCopy[row - 1][col + 0] != -1);    
         if(notEmpty && !(already.includes((row - 1) + ", " + (col + 0)))) {
             alreadyFound += (row - 1) + ", " + (col + 0) + ".";
             notFarthestUp = true;
-            adjacents += (row - 1) + ", " + (col + 0) + "."
+            adjacents += (row - 1) + ", " + (col + 0) + ".";
+            // console.log("FOUND",  ((row - 1) + ", " + (col + 0)), "FROM", row, col);
             
-            if(circles[row - 1][col + 0] != -1) {            
+            if(islandCheckCirclesCopy[row - 1][col + 0] != -1) {            
                 adjacents += getIslandAdjacents(row - 1, col + 0);
             }
         }
     }
     // down
-    if(row < circles.length - 1){
+    if(row < islandCheckCirclesCopy.length - 1){
         notFarthestDown = true;
-        let notEmpty = (circles[row + 1][col + 0] != -1);    
+        let notEmpty = (islandCheckCirclesCopy[row + 1][col + 0] != -1);
         if(notEmpty && !(already.includes((row + 1) + ", " + (col + 0)))) {
             alreadyFound += (row + 1) + ", " + (col + 0) + ".";
             notFarthestDown = true;
-            adjacents += (row + 1) + ", " + (col + 0) + "."
+            adjacents += (row + 1) + ", " + (col + 0) + ".";
+            // console.log("FOUND",  ((row + 1) + ", " + (col + 0)), "FROM", row, col);
             
-            if(circles[row + 1][col + 0] != -1) {            
+            if(islandCheckCirclesCopy[row + 1][col + 0] != -1) {            
                 adjacents += getIslandAdjacents(row + 1, col + 0);
             }
         }
@@ -615,12 +622,13 @@ function getIslandAdjacents(row, col) {
 
     // top-left
     if(notFarthestUp && notFarthestLeft && (row % 2 == 0)) {
-        let notEmpty = (circles[row - 1][col - 1] != -1);    
+        let notEmpty = (islandCheckCirclesCopy[row - 1][col - 1] != -1);    
         if(notEmpty && !(already.includes((row - 1) + ", " + (col - 1)))) {
             alreadyFound += (row - 1) + ", " + (col - 1) + ".";
-            adjacents += (row - 1) + ", " + (col - 1) + "."
+            adjacents += (row - 1) + ", " + (col - 1) + ".";
+            // console.log("FOUND",  ((row - 1) + ", " + (col - 1)), "FROM", row, col);
             
-            if(circles[row - 1][col - 1] != -1) {            
+            if(islandCheckCirclesCopy[row - 1][col - 1] != -1) {            
                 adjacents += getIslandAdjacents(row - 1, col - 1);
             }
         }
@@ -628,12 +636,13 @@ function getIslandAdjacents(row, col) {
 
     // top-right
     if(notFarthestUp && notFarthestRight && (row % 2 == 1)) {
-        let notEmpty = (circles[row - 1][col + 1] != -1);    
+        let notEmpty = (islandCheckCirclesCopy[row - 1][col + 1] != -1);    
         if(notEmpty && !(already.includes((row - 1) + ", " + (col + 1)))) {
             alreadyFound += (row - 1) + ", " + (col + 1) + ".";
-            adjacents += (row - 1) + ", " + (col + 1) + "."
+            adjacents += (row - 1) + ", " + (col + 1) + ".";
+            // console.log("FOUND",  ((row - 1) + ", " + (col + 1)), "FROM", row, col);
             
-            if(circles[row - 1][col + 1] != -1) {            
+            if(islandCheckCirclesCopy[row - 1][col + 1] != -1) {            
                 adjacents += getIslandAdjacents(row - 1, col + 1);
             }
         }
@@ -641,12 +650,13 @@ function getIslandAdjacents(row, col) {
 
     // bottom-left
     if(notFarthestDown && notFarthestLeft && (row % 2 == 0)) {
-        let notEmpty = (circles[row + 1][col - 1] != -1);    
+        let notEmpty = (islandCheckCirclesCopy[row + 1][col - 1] != -1);    
         if(notEmpty && !(already.includes((row + 1) + ", " + (col - 1)))) {
             alreadyFound += (row + 1) + ", " + (col - 1) + ".";
-            adjacents += (row + 1) + ", " + (col - 1) + "."
+            adjacents += (row + 1) + ", " + (col - 1) + ".";
+            // console.log("FOUND",  ((row + 1) + ", " + (col - 1)), "FROM", row, col);
             
-            if(circles[row + 1][col - 1] != -1) {            
+            if(islandCheckCirclesCopy[row + 1][col - 1] != -1) {            
                 adjacents += getIslandAdjacents(row + 1, col - 1);
             }
         }
@@ -654,12 +664,13 @@ function getIslandAdjacents(row, col) {
 
     // bottom-right
     if(notFarthestDown && notFarthestRight && (row % 2 == 1)) {
-        let notEmpty = (circles[row + 1][col + 1] != -1);    
+        let notEmpty = (islandCheckCirclesCopy[row + 1][col + 1] != -1);    
         if(notEmpty && !(already.includes((row + 1) + ", " + (col + 1)))) {
             alreadyFound += (row + 1) + ", " + (col + 1) + ".";
-            adjacents += (row + 1) + ", " + (col + 1) + "."
+            adjacents += (row + 1) + ", " + (col + 1) + ".";
+            // console.log("FOUND",  ((row + 1) + ", " + (col + 1)), "FROM", row, col);
             
-            if(circles[row + 1][col + 1] != -1) {            
+            if(islandCheckCirclesCopy[row + 1][col + 1] != -1) {            
                 adjacents += getIslandAdjacents(row + 1, col + 1);
             }
         }
@@ -667,6 +678,9 @@ function getIslandAdjacents(row, col) {
 
     }
 
+    // console.log(row, col);
+    // console.log(already);
+    // console.log(alreadyFound.length);
     
     return adjacents;
 }
@@ -674,10 +688,28 @@ function getIslandAdjacents(row, col) {
 let empties = [];
 function getNonEmptyCount() {
     let count = 0;
+    empties = [];
 
     for(let row = 0; row < circles.length; row++) {
         for(let col = 0; col < circles[row].length; col++) {
             if(circles[row][col] != -1) {
+                ++count;
+            }
+            else {
+                empties.push([row, col])
+            }
+        }
+    }
+
+    return count;
+}
+
+function getNonEmptyIslandCount() {
+    let count = 0;
+
+    for(let row = 0; row < islandCheckCirclesCopy.length; row++) {
+        for(let col = 0; col < islandCheckCirclesCopy[row].length; col++) {
+            if(islandCheckCirclesCopy[row][col] != -1) {
                 ++count;
             }
         }
@@ -769,9 +801,11 @@ let animateRemoveCircles = {
 let nonEmptyBefore = -1;
 let nonEmptyAfter = -1;
 let alreadyFound = "";
+let removedFromLaunch = false;
 function checkForDeletes(row, col, color) {
     console.log("|-|.|-|.|-|.|-|.|-|.|-|.|-|.|-|.|-|.|-|");
     alreadyFound = row + ", " + col + ".";
+    removedFromLaunch = false;
     
     let adjacents = getAdjacents(row, col, color);
     let adjacentArray = adjacents.split(".");
@@ -795,12 +829,8 @@ function checkForDeletes(row, col, color) {
         console.log(removeDuplicates);
     }
 
-    let minRow = -1;
-    let maxRow = -1;
-    let minCol = -1;
-    let maxCol = -1;
-
     if(removeDuplicates.length > 1) {
+        removedFromLaunch = true;
         animateRemoveCircles.toRemove = [];
 
         animateRemoveCircles.toRemove.push([row, col]);
@@ -810,20 +840,6 @@ function checkForDeletes(row, col, color) {
             let row = parseInt(split[0]);
             let col = parseInt(split[1]);
 
-            if((row < minRow) || (minRow == -1)) {
-                minRow = row;
-            }
-            if((row > maxRow) || (maxRow == -1)) {
-                maxRow = row;
-            }
-            
-            if((col < minCol) || (minCol == -1)) {
-                minCol = col;
-            }
-            if((col > maxCol) || (maxCol == -1)) {
-                maxCol = col;
-            }
-
             animateRemoveCircles.toRemove.push([row, col]);
         }
 
@@ -832,21 +848,29 @@ function checkForDeletes(row, col, color) {
     else {
         --lives;
 
+        launched.finishedLaunch();
+
         if(lives == 0) {
             resetLives();
         }
-
-        launched.finishedLaunch();
     }
+}
 
+let islandCheckCirclesCopy;
+let startedCheckForIslands = false;
+function checkForIslands() {
+    console.clear();
+    startedCheckForIslands = true;
     // check for islands, only need to check if launched circle caused group to be removed
-    if(removeDuplicates.length > 1) {
+    if(removedFromLaunch) {
+        islandCheckCirclesCopy = circles.slice();
         console.log("checking for islands");
         let checkForIslands = true;
         alreadyFound = "";
 
         let iterations = 0;
 
+        let nonEmptyCount = getNonEmptyIslandCount();
         while(checkForIslands) {
             let alreadyCheck = alreadyFound.split(".");
             /**
@@ -858,9 +882,9 @@ function checkForDeletes(row, col, color) {
              */
             let startRow = -1;
             let startCol = -1;
-            for(let r = circles.length - 1; r > 0; r--) {
-                for(let c = 0; c < circles[r].length; c++) {
-                    if((circles[r][c] != -1) && 
+            for(let r = islandCheckCirclesCopy.length - 1; r > 0; r--) {
+                for(let c = 0; c < islandCheckCirclesCopy[r].length; c++) {
+                    if((islandCheckCirclesCopy[r][c] != -1) && 
                     !(alreadyCheck.includes(r + ", " + c))) {
                         startRow = r;
                         startCol = c;
@@ -874,9 +898,7 @@ function checkForDeletes(row, col, color) {
                 }
             }
 
-            console.log("starting island search at ", startRow, startCol);
-
-            let nonEmptyCount = getNonEmptyCount();
+            // console.log("starting island search at ", startRow, startCol);
             
             // alreadyFound += startRow + ", " + startCol + ".";
 
@@ -884,10 +906,6 @@ function checkForDeletes(row, col, color) {
                 getIslandAdjacents(startRow, startCol);
             let islandAdjacentSet = new Set(islandAdjacents.split("."));
 
-            console.log(islandAdjacentSet);
-            console.log(empties);
-
-            console.log("BEFORE", islandAdjacentSet.size);
             if(startRow != -1) {
                 let remove = islandAdjacentSet.has("");
                 while(remove) {
@@ -895,36 +913,32 @@ function checkForDeletes(row, col, color) {
                     remove = islandAdjacentSet.has("");
                 }
             }
-            console.log("AFTER", islandAdjacentSet.size)
+
+            console.log("ADJACENT");
+            console.log(islandAdjacentSet);
             
-            if((islandAdjacentSet.size < nonEmptyCount) && (startRow != -1)) {
-                console.log("there is an island, checking if found island in bounds.");
+            // console.log("EMPTIES");
+            // console.log(empties);
+
+            // console.log("StartRow, islandAdjacentSet, nonEmptyCount", 
+                // startRow, islandAdjacentSet.size, nonEmptyCount)
+            
+            if(((islandAdjacentSet.size) < nonEmptyCount) && (startRow != -1)) {
+                // console.log("there is an island, checking if found island in bounds.");
                 let inBounds = true;
 
                 islandAdjacentSet.forEach(function(check) {
                     if(check.length > 0) {
                         let checkSplit = check.split(", ");
-                        let rowCheck = checkSplit[0];
-                        let colCheck = checkSplit[1];
 
-                        if(rowCheck > maxRow) {
-                            inBounds = false;
-                        }
-                        if(rowCheck < minRow) {
-                            inBounds = false;
-                        }
-
-                        if(colCheck > maxCol) {
-                            inBounds = false;
-                        }
-                        if(colCheck < minCol) {
+                        if(checkSplit[0] == 0) {
                             inBounds = false;
                         }
                     }
                 });
 
                 if(inBounds) {
-                    console.log("found island IN bounds");
+                    // console.log("found island IN bounds");
 
                     // console.log("THE ALREADY:");
                     // let test = new Set(alreadyFound.split("."));
@@ -933,107 +947,125 @@ function checkForDeletes(row, col, color) {
                     // window.setTimeout(function(){
                     islandAdjacentSet.forEach(function(circle) {
                         if(circle.length > 0) {
-                        let circleSplit = circle.split(", ");
+                            let circleSplit = circle.split(", ");
 
-                        let circleRow = circleSplit[0];
-                        let circleCol = circleSplit[1];
+                            let circleRow = circleSplit[0];
+                            let circleCol = circleSplit[1];
 
-                        console.log("removing island", circleRow, circleCol);
-                        circles[circleRow][circleCol] = -1;
+                            // console.log("removing island", circleRow, circleCol);
+                            islandCheckCirclesCopy[circleRow][circleCol] = -1;
+                            animateRemoveCircles.toRemove.push([circleRow, circleCol]);
                         }
                     });
                     // }, 500);
 
-                    nonEmptyCount = getNonEmptyCount();
+                    nonEmptyCount = getNonEmptyIslandCount();
                     checkForIslands = ((islandAdjacentSet.size - 1) < nonEmptyCount);
+                    
+                    console.log(nonEmptyCount);
+                    console.log("-----");
                 }
                 else {
                     checkForIslands = true;
-                    console.log("found island NOT in bounds");
+                    // console.log("found island NOT in bounds");
                 }
             }
             else {
                 checkForIslands = false;
-                console.log("there are no islands");
+                // console.log("there are no islands");
             }
 
-            console.log("check again?", checkForIslands);
-            console.log("--------------------");
+            // console.log("check again?", checkForIslands);
+            // console.log("--------------------");
 
             ++iterations;
-            if(iterations > 20) {
+            if(iterations > 10) {
                 console.log("!!!!!INFINITE LOOP DETECTED!!!!!");
                 checkForIslands = false;
             }
         }
+
+        console.log("iterations", iterations);
+
+        if(iterations == 1) {
+            launched.finishedIslandCheck();
+        }
+        else {
+            animateRemoveCircles.animate();
+        }
+
+        // console.log("%%%%%%%%%%%%%%%%%%%%");
+        // console.log("we are done here")
+        // console.log("%%%%%%%%%%%%%%%%%%%%");
     }
     else {
-        console.log("don't need to check for islands");
+        // console.log("don't need to check for islands");
+        launched.finishedIslandCheck();
     }
 
     // for some reasons islands with a length of 1 don't get removed
-    for(let row = 0; row < circles.length; row++) {
-        for(let col = 0; col < circles[row].length; col++) {
-            let leftEmpty = false;
-            if((col > 0) && (circles[row][col - 1] == -1)) {
-                leftEmpty = true;
-            }
+    // for(let row = 0; row < circles.length; row++) {
+    //     for(let col = 0; col < circles[row].length; col++) {
+    //         let leftEmpty = false;
+    //         if((col > 0) && (circles[row][col - 1] == -1)) {
+    //             leftEmpty = true;
+    //         }
 
-            let rightEmpty = false;
-            if((col < circles[row].length - 1) && (circles[row][col + 1] == -1)) {
-                rightEmpty = true;
-            }
+    //         let rightEmpty = false;
+    //         if((col < circles[row].length - 1) && (circles[row][col + 1] == -1)) {
+    //             rightEmpty = true;
+    //         }
 
-            let upEmpty = false;
-            if((row > 0) && (circles[row - 1][col] == -1)) {
-                upEmpty = true;
-            }
+    //         let upEmpty = false;
+    //         if((row > 0) && (circles[row - 1][col] == -1)) {
+    //             upEmpty = true;
+    //         }
 
-            let downEmpty = false;
-            if((row < circles.length - 1) && (circles[row + 1][col] == -1)) {
-                downEmpty = true;
-            }
+    //         let downEmpty = false;
+    //         if((row < circles.length - 1) && (circles[row + 1][col] == -1)) {
+    //             downEmpty = true;
+    //         }
 
-            if(leftEmpty && rightEmpty && upEmpty && downEmpty) {
-                if(row % 2 == 1) {
-                    let topRightEmpty = false;
-                    if((row > 0) && (col < circles[row].length - 1) &&
-                    upEmpty && rightEmpty) {
-                        topRightEmpty = true;
-                    }
+    //         if(leftEmpty && rightEmpty && upEmpty && downEmpty) {
+    //             if(row % 2 == 1) {
+    //                 let topRightEmpty = false;
+    //                 if((row > 0) && (col < circles[row].length - 1) &&
+    //                 upEmpty && rightEmpty) {
+    //                     topRightEmpty = true;
+    //                 }
 
-                    let bottomRightEmpty = false;
-                    if((row < circles.length - 1) && (col < circles[row].length - 1) && 
-                    downEmpty && rightEmpty) {
-                        bottomRightEmpty = true;
-                    }
+    //                 let bottomRightEmpty = false;
+    //                 if((row < circles.length - 1) && (col < circles[row].length - 1) && 
+    //                 downEmpty && rightEmpty) {
+    //                     bottomRightEmpty = true;
+    //                 }
 
-                    if(topRightEmpty && bottomRightEmpty) {
-                        console.log("FOUND A SINGLE ISLAND AT", row, col);
-                        circles[row][col] = -1;
-                    }
-                }
-                else {
-                    let topLeftEmpty = false;
-                    if((row > 0) && (col > 0) &&
-                    upEmpty && leftEmpty) {
-                        topLeftEmpty = true;
-                    }
+    //                 if(topRightEmpty && bottomRightEmpty) {
+    //                     console.log("FOUND A SINGLE ISLAND AT", row, col);
+    //                     circles[row][col] = -1;
+    //                 }
+    //             }
+    //             else {
+    //                 let topLeftEmpty = false;
+    //                 if((row > 0) && (col > 0) &&
+    //                 upEmpty && leftEmpty) {
+    //                     topLeftEmpty = true;
+    //                 }
 
-                    let bottomLeftEmpty = false;
-                    if((row < circles.length - 1) && (col > 0) && 
-                    downEmpty && leftEmpty) {
-                        bottomLeftEmpty = true;
-                    }
+    //                 let bottomLeftEmpty = false;
+    //                 if((row < circles.length - 1) && (col > 0) && 
+    //                 downEmpty && leftEmpty) {
+    //                     bottomLeftEmpty = true;
+    //                 }
 
-                    if(topLeftEmpty && bottomLeftEmpty) {
-                        console.log("FOUND A SINGLE ISLAND AT", row, col);
-                        circles[row][col] = -1;
-                    }
-                }
-            }
-        }
-    }
+    //                 if(topLeftEmpty && bottomLeftEmpty) {
+    //                     console.log("FOUND A SINGLE ISLAND AT", row, col);
+    //                     circles[row][col] = -1;
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
 }
 
 function setMouseAngle(e) {
@@ -1323,7 +1355,13 @@ function drawEffects() {
     }
 
     if(effectsFinished) {
-        launched.finishedLaunch();
+        console.log("made it here")
+        if(startedCheckForIslands) {
+            launched.finishedIslandCheck();
+        }
+        else {
+            launched.finishedLaunch();
+        }
     }
 }
 
