@@ -3,8 +3,8 @@ let r;
 let w, h;
 
 let debugMode = false;
-let drawRowCols = true;
-let startWithBridge = true;
+let drawRowCols = false;
+let startWithBridge = false;
 let smallerBridge = false;
 let twoBridges = true;
 let islandEdge = false;
@@ -331,7 +331,29 @@ function initCircles() {
         let currentRow = [];
     
         for(let col = 0; col < CIRCLES_MAX_COUNT_HORIZONTAL; col++) {
-            currentRow.push(randomColor());
+            if(col == 0) {
+                currentRow.push(randomColor());
+            }
+            else {
+                let random = Math.random();
+
+                if(random > 0.5) {
+                    currentRow.push(randomColor());
+                }
+                else {
+                    let previous = currentRow[col - 1];
+
+                    // to prevent the very low chance of infinitely choosing same color over and over again
+                    for(let i = 0; i < 500; i++) {
+                        let check = randomColor();
+
+                        if(check != previous) {
+                            currentRow.push(check);
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
         circles.push(currentRow);
