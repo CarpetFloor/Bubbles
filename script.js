@@ -18,7 +18,11 @@ let space;
 
 let gameInterval;
 
+let removeEffectImg = new Image();
+
 window.onload = () => {
+    removeEffectImg.src = "Images/removeEffect.png";
+
     c = document.querySelector("canvas");
     r = c.getContext("2d");
     w = parseInt(window.getComputedStyle(c, null).getPropertyValue("width"));
@@ -161,6 +165,7 @@ function findNextAvailInsert(row, col) {
 
 let launcherX = -1;
 let launcherY = -1;
+let showLauncherCircle = true;
 
 let launched = {
     x: -1, 
@@ -170,7 +175,11 @@ let launched = {
     moving: false, 
     previousRow: -1, 
     previousCol: -1, 
+    canLaunch: true, 
     update: function() {
+        drawCircle(this.x, this.y, 
+            currentColor, circleSize);
+        
         this.x += this.moveX;
         this.y += this.moveY;
 
@@ -178,9 +187,6 @@ let launched = {
         if((this.x > w - circleSize) || (this.x < circleSize)) {
             this.moveX *= -1;
         }
-
-        drawCircle(this.x, this.y, 
-            currentColor, circleSize);
         
         let collisionCheck = getCircleAt(this.x, this.y);
 
@@ -210,17 +216,22 @@ let launched = {
             nonEmptyBefore = getNonEmptyCount();
             
             addCircleAt(insertRow, this.previousCol, currentColor);
-
-            nonEmptyAfter = getNonEmptyCount();
-            updateScore();
-
-            currentColor = nextColor;
-            nextColor = nextNextColor;
-            nextNextColor = randomColor();
         }
 
         this.previousRow = getRow(this.y);
         this.previousCol = getCol(this.previousRow, this.x);
+    }, 
+    finishedLaunch: function() {
+        effectsFinished = true;
+        nonEmptyAfter = getNonEmptyCount();
+        updateScore();
+
+        currentColor = nextColor;
+        nextColor = nextNextColor;
+        nextNextColor = randomColor();
+
+        showLauncherCircle = true;
+        launched.canLaunch = true;
     }
 };
 
@@ -257,7 +268,7 @@ let aimer = {
         }
 
         // main circle
-        if(!(launched.moving)) {
+        if(showLauncherCircle) {
             drawCircle(x, y, 
                 currentColor, circleSize);
         }
@@ -753,6 +764,66 @@ function updateScore() {
     score += removed * multiply;
 }
 
+class RemoveEffect {
+    constructor(row, col) {
+        this.row = row;
+        this.col = col;
+        this.changeFrame = 0;
+        this.maxChangeFrame = 2;
+        this.frame = 0;
+        this.maxFrame = 3;
+    }
+    animate() {
+        let clipX = 64 * this.frame;
+        let clipY = 64 * 5;
+        let size = 64 * 1;
+
+        let x = (this.col * space) - (size * 0.5) + (space / 2) + 2;
+        if ((this.row % 2 == 1) && shiftOddRows) {
+            x += circleSize + CIRCLES_SPACING;
+        }
+        let y = (this.row * space) - (size * 0.5) + (space / 2) + 2;
+
+
+        r.drawImage(
+            removeEffectImg,
+            clipX, clipY,
+            64, 64,
+            x, y,
+            size, size
+        );
+
+        ++this.changeFrame;
+        if(this.changeFrame > this.maxChangeFrame) {
+            this.changeFrame = 0;
+            
+            ++this.frame;
+            if(this.frame > this.maxFrame) {
+                effectsQueue.splice(0, 1);
+            }
+        }
+    }
+}
+
+let effectsQueue = [];
+let animateRemoveCircles = {
+    toRemove: [], 
+    speed: 80, 
+    animate: function() {
+        if(this.toRemove.length > 0) {
+            circles[this.toRemove[0][0]][this.toRemove[0][1]] = -1;
+            effectsQueue.push(new RemoveEffect(this.toRemove[0][0], this.toRemove[0][1]));
+            
+            this.toRemove.splice(0, 1);
+
+            
+            window.setTimeout(function() {
+                animateRemoveCircles.animate();
+            }, this.speed);
+        }
+    }
+}
+
 let nonEmptyBefore = -1;
 let nonEmptyAfter = -1;
 let alreadyFound = "";
@@ -788,7 +859,9 @@ function checkForDeletes(row, col, color) {
     let maxCol = -1;
 
     if(removeDuplicates.length > 1) {
-        circles[row][col] = -1;
+        animateRemoveCircles.toRemove = [];
+
+        animateRemoveCircles.toRemove.push([row, col]);
 
         for(let circle of removeDuplicates) {
             let split = circle.split(", ");
@@ -809,8 +882,10 @@ function checkForDeletes(row, col, color) {
                 maxCol = col;
             }
 
-            circles[row][col] = -1;
+            animateRemoveCircles.toRemove.push([row, col]);
         }
+
+        animateRemoveCircles.animate();
     }
     else {
         --lives;
@@ -818,6 +893,8 @@ function checkForDeletes(row, col, color) {
         if(lives == 0) {
             resetLives();
         }
+
+        launched.finishedLaunch();
     }
 
     // check for islands, only need to check if launched circle caused group to be removed
@@ -1031,7 +1108,9 @@ function setMouseAngle(e) {
 
 function launch(e) {
     // don't allow launching ball to horizontal to prevent bouncing back and forth horizontally
-    if(!(launched.moving) && (mouseY >= mouseLimitY)) {
+    if(!(launched.moving) && (mouseY >= mouseLimitY) && launched.canLaunch) {
+        launched.canLaunch = false;
+        showLauncherCircle = false;
         launched.moving = true;
 
         /**
@@ -1069,7 +1148,7 @@ let border = false;
 const BORDER_COLOR_DIFF = 40;
 // const BORDER_SIZE = 2.5;
 const BORDER_SIZE = 2;
-let borderStyle = 1;
+let borderStyle = 2;
 
 let stylized = true;
 let stylizedShadow = false;
@@ -1240,6 +1319,23 @@ function drawBottomBorder() {
     r.fillRect(0, y, w, 1);
 }
 
+let effectsFinished = false;
+function drawEffects() {
+    effectsFinished = false;
+
+    if(effectsQueue.length > 0) {
+        for(let i = 0; i < effectsQueue.length; i++) {
+            effectsQueue[i].animate();
+        }
+
+        effectsFinished = (effectsQueue.length == 0);
+    }
+
+    if(effectsFinished) {
+        launched.finishedLaunch();
+    }
+}
+
 function loop() {
     let frameStart = Date.now();
 
@@ -1248,6 +1344,8 @@ function loop() {
     drawBottomBorder();
 
     drawCircles();
+
+    drawEffects();
 
     drawNextColors();
 

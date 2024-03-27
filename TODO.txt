@@ -6,13 +6,13 @@ BUGS
 -Sometimes islands are not removed
 
 TODO
--Fix launched circle not getting placed correctly
+-Generate circles with less chance of large groups
 -Fix islands not getting cleared
--Clean up code
 -Fancy animations:
     >Score update
-    >Launched circle impact (different than removing )
-    >Remove circles animation
+    >Launched circle impact (different than removing)
     >Move circles down animation
     >Something for game over
     >Something for game won
+-Fix launched circle not getting placed correctly
+-Clean up code
