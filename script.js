@@ -21,7 +21,7 @@ let gameInterval;
 let removeEffectImg = new Image();
 
 window.onload = () => {
-    removeEffectImg.src = "Images/removeEffect.png";
+    removeEffectImg.src = "Images/RemoveEffect.png";
 
     c = document.querySelector("canvas");
     r = c.getContext("2d");
