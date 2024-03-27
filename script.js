@@ -335,49 +335,6 @@ function initCircles() {
     }
 }
 
-function drawCircles() {
-    let x = -1;
-    let y = circleSize + CIRCLES_SPACING;
-
-    for(let row = 0; row < circles.length; row++) {
-        x = circleSize + CIRCLES_SPACING;
-        
-        if(row % 2 == 1 && shiftOddRows) {
-            x += circleSize + CIRCLES_SPACING;
-        }
-
-        for(let col = 0; col < circles[row].length; col++) {
-            if(circles[row][col] != -1) {
-                drawCircle(
-                    x, 
-                    y, 
-                    circles[row][col], 
-                    circleSize
-                );
-
-                if(debugMode) {
-                    r.fillStyle = "yellow";
-                    r.fillRect(x - (10 / 2), y - (10 / 2), 10, 10);
-                }
-
-                if(drawRowCols) {
-                    r.font = "bold 12px Arial";
-                    r.fillStyle = "White";
-                    r.fillText(row + "," + col, x - (10 / 2) - 3, y - (10 / 2) - 2)
-
-                    r.font = "bold 12px Arial";
-                    r.fillStyle = "Black";
-                    r.fillText(row + "," + col, x - (10 / 2) - 3, y - (10 / 2) - 2);
-                }
-            }
-
-            x += (circleSize * 2) + CIRCLES_SPACING;
-        }
-
-        y += (circleSize * 2) + CIRCLES_SPACING;
-    }
-}
-
 function getDistance(fromX, fromY, toX, toY) {
     let xdiff = Math.abs(toX - fromX);
     let ydiff = Math.abs(toY - fromY);
@@ -729,28 +686,13 @@ function getNonEmptyCount() {
     return count;
 }
 
+let inMoveRowAnimation = false;
+let moveRowAnimationOffset = 0;
 function resetLives() {
     lives = 5;
 
-    // add new row
-    let row = [];
-    for(let col = 0; col < circles[0].length; col++) {
-        row.push(-1);
-    }
-    
-    circles.push(row);
-
-    // move everything down
-    for(let row = circles.length - 1; row > 1; row--) {
-        for(let col = 0; col < circles[row].length; col++) {
-            circles[row][col] = circles[row - 1][col];
-        }
-    }
-
-    // "add" new row by replacing top row with random stuf
-    for(let col = 0; col < circles[0].length; col++) {
-        circles[0][col] = randomColor();
-    }
+    moveRowAnimationOffset = 0;
+    inMoveRowAnimation = true;
 }
 
 function updateScore() {
@@ -1246,6 +1188,55 @@ function drawSimpleCircle(x, y, color, size) {
     r.fill();
 }
 
+function drawCircles() {
+    let x = -1;
+    let y = circleSize + CIRCLES_SPACING;
+    let noOffsetY = y;
+
+    for(let row = 0; row < circles.length; row++) {
+        if(inMoveRowAnimation) {
+            y += moveRowAnimationOffset;
+        }
+
+        x = circleSize + CIRCLES_SPACING;
+        
+        if((row % 2 == 1) && shiftOddRows) {
+            x += circleSize + CIRCLES_SPACING;
+        }
+
+        for(let col = 0; col < circles[row].length; col++) {
+            if(circles[row][col] != -1) {
+                drawCircle(
+                    x, 
+                    y, 
+                    circles[row][col], 
+                    circleSize
+                );
+
+                if(debugMode) {
+                    r.fillStyle = "yellow";
+                    r.fillRect(x - (10 / 2), y - (10 / 2), 10, 10);
+                }
+
+                if(drawRowCols) {
+                    r.font = "bold 12px Arial";
+                    r.fillStyle = "White";
+                    r.fillText(row + "," + col, x - (10 / 2) - 3, y - (10 / 2) - 2)
+
+                    r.font = "bold 12px Arial";
+                    r.fillStyle = "Black";
+                    r.fillText(row + "," + col, x - (10 / 2) - 3, y - (10 / 2) - 2);
+                }
+            }
+
+            x += (circleSize * 2) + CIRCLES_SPACING;
+        }
+
+        y = noOffsetY + (circleSize * 2) + CIRCLES_SPACING;
+        noOffsetY = y;
+    }
+}
+
 function drawNextColors() {
     let x = launcherX - (space * 1.5);
     drawCircle(
@@ -1336,6 +1327,39 @@ function drawEffects() {
     }
 }
 
+function checkforMoveRowAnimation() {
+    if(inMoveRowAnimation) {
+        launched.canLaunch = false;
+        moveRowAnimationOffset += 3;
+
+        let max = (circleSize * 2) + CIRCLES_SPACING;
+        if(moveRowAnimationOffset > max) {
+            // add new row
+            let row = [];
+            for(let col = 0; col < circles[0].length; col++) {
+                row.push(-1);
+            }
+
+            circles.push(row);
+
+            // move everything down
+            for(let row = circles.length - 1; row > 0; row--) {
+                for(let col = 0; col < circles[row].length; col++) {
+                    circles[row][col] = circles[row - 1][col];
+                }
+            }
+
+            // "add" new row by replacing top row with random stuf
+            for(let col = 0; col < circles[0].length; col++) {
+                circles[0][col] = randomColor();
+            }
+
+            inMoveRowAnimation = false;
+            launched.canLaunch = true;
+        }
+    }
+}
+
 function loop() {
     let frameStart = Date.now();
 
@@ -1376,6 +1400,8 @@ function loop() {
             10
         );
     }
+
+    checkforMoveRowAnimation();
 
     checkForGameOver();
 
